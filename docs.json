@@ -74,8 +74,8 @@
         },
         {
           "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "href": "https://discord.gg/9D6Xdj2MPU",
+          "icon": "discord"
         },
         {
           "anchor": "Blog",
@@ -87,7 +87,8 @@
   },
   "logo": {
     "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "dark": "/logo/dark.svg",
+    "href": "https://docs.npcbuilder.com"
   },
   "navbar": {
     "links": [
