@@ -1,4 +1,4 @@
-logo {
-  width: 300px; /* Adjust this value as needed */
-  height: 300px;
+#navbar img {
+  width: 150px; /* Adjust this value as needed */
+  height: auto;
 }
