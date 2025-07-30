@@ -31,7 +31,7 @@
     "languages": [
       {
         "language": "en",
-        "dropdowns": [
+        "tabs": [
           {
             "dropdown": "Guides",
             "icon": "book",
