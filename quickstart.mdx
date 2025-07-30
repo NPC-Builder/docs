@@ -1,80 +1,58 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Set up NPC Builder and run your first conversation"
 ---
 
-## Get started in three steps
+<Info>
+<strong>Prerequisites</strong><br/>
+• NPC Builder account • Game created in dashboard
+</Info>
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Log in & create a game">
+    Sign in at <a href="https://app.npcbuilder.com">app.npcbuilder.com</a> and create a new game project.<br/>
+    Copy the shown <code>GAME_ID</code>.
+  </Step>
 
-### Step 1: Set up your local environment
+  <Step title="Generate API token">
+    In <em>Developers → API Tokens</em> click <strong>Generate Bearer Token</strong>.<br/>
+    Store the JWT safely.  
+    ```http
+    Authorization: Bearer YOUR_TOKEN
+    ```
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Copy World ID">
+    Expand the context tree and copy your <code>WORLD_ID</code>.  
+    (Add more worlds any time.)
+  </Step>
 
-### Step 2: Deploy your changes
+  <Step title="POST /interactions">
+    ```bash
+    curl -X POST https://app.npcbuilder.com/api/interactions \\
+      -H "Authorization: Bearer YOUR_TOKEN" \\
+      -H "Content-Type: application/json" \\
+      -d '{
+            "character_name": "Guardian",
+            "game_id": "GAME_ID",
+            "world_id": "WORLD_ID",
+            "messages": [
+              { "role": "user", "content": "Hello!" }
+            ]
+          }'
+    ```
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+  <Step title="Read reply">
+    ```json
+    {
+      "response": "Greetings, traveler!",
+      "user_events": [],
+      "character_events": []
+    }
+    ```
+    Show <code>response</code> to the player; handle events as gameplay hooks.
+  </Step>
+</Steps>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+<Note>Unity / Unreal plugins wrap these calls for you—see integration guides.</Note>

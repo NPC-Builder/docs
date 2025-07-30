@@ -1,0 +1,186 @@
+---
+title: "New file"
+description: "Description of your new file."
+---
+
+Unity Integration – Plugin
+
+Welcome to the NPC Builder Plugin for Unity! This plugin is designed to streamline the integration of AI-powered NPCs into your Unity projects. It provides a set of C# scripts and components that allow your game to talk to NPC Builder's AI backend, so your NPC characters can have dynamic, context-aware conversations with players. This guide will walk you through setting up the Unity plugin and using it from start to finish.
+Prerequisites
+
+Unity 2019.4 or higher (Unity 2020.2 or later recommended for the included Input System example).
+A basic understanding of Unity's interface and C# scripting.
+An NPC Builder account with an active project (and at least one NPC character created on the platform).
+Installation
+
+<Steps>
+<Step title="Import the NPC Builder Unity Package">
+Download the **NPC Builder Plugin** for Unity from the Unity Asset Store (or the link provided by NPC Builder). Once downloaded, open your Unity project:
+- Go to **Assets → Import Package → Custom Package**.
+- Select the downloaded NPC Builder Unity package (e.g., a `.unitypackage` file).
+- Click **Import** and ensure all files are selected.
+Unity will add the NPC Builder plugin files into your project.
+</Step>
+<Step title="Verify Installation">
+After import, check that the NPC Builder plugin assets are present in your Unity project's **Assets** folder (there will likely be an `NPCBuilder` folder with scripts, a README, etc.). You should see a script or component called **NPCBuilderInteractions** and related assets. This confirms the plugin is installed and ready to use.
+</Step>
+</Steps>
+
+Configuring Credentials
+
+Before your Unity game can communicate with NPC Builder's API, you need to provide your credentials (Client ID/Secret or token). The Unity plugin comes with a configuration file to store these.
+
+<Steps>
+<Step title="Locate the Config File">
+In your Unity Project window, navigate to the NPC Builder plugin's files (for example, **Assets/NPCBuilder/**). There should be a file named **`config.json`** at the root of the NPCBuilder plugin folder.
+![NPC Builder config.json file in Unity project](./images/unity-config-file.png)
+</Step>
+<Step title="Edit the Config with Credentials">
+Open **config.json** in a text editor (or click it in Unity and use the Inspector if available). You will see placeholders for <code>clientId</code>, <code>clientSecret</code>, and <code>bearerToken</code>. Fill in these fields with the values provided by NPC Builder:
+
+```json
+{
+  "clientId": "YOUR_CLIENT_ID",
+  "clientSecret": "YOUR_CLIENT_SECRET",
+  "bearerToken": "YOUR_BEARER_TOKEN"
+}
+```
+
+- **clientId** and **clientSecret:** These come from the NPC Builder platform (under your project's API Keys). They are used for secure, permanent authentication.
+- **bearerToken:** This is an optional token for authentication. You can use a Bearer token (generated in the NPC Builder web portal) for simpler integration or testing.
+
+If you provide both a clientSecret and a bearerToken, the plugin will prefer the clientId/clientSecret method.
+</Step>
+<Step title="Save and Secure">
+Save the **config.json** file after entering your credentials. **Keep these values secure** – do not share this file or check it into public source control. The plugin will read this config at runtime to authenticate with the NPC Builder service. If at any point you need to rotate your credentials (e.g., if a key is compromised or updated), remember to update this file accordingly.
+</Step>
+</Steps>
+
+Using the Plugin
+
+With the plugin installed and configured, you can now add AI NPC functionality to your game objects. The NPC Builder Unity plugin works by attaching an NPCBuilderInteractions component to any NPC GameObject and using it to send/receive messages.
+
+<Steps>
+<Step title="Attach the NPCBuilderInteractions Component">
+In your Unity scene, select the GameObject that represents your NPC (for example, a character prefab or an empty object that will act as the NPC's logic holder). In the Unity **Inspector**, click **Add Component** and add **"NPCBuilderInteractions"**.
+![NPCBuilderInteractions component added to a Unity GameObject](./images/unity-npcbuilder-component.png)
+This component will handle communication with the NPC Builder backend. You can adjust settings on this component if needed (like default character info), or leave it with defaults to be set via script.
+</Step>
+<Step title="Obtain Required IDs from NPC Builder">
+Ensure you have the relevant IDs from the NPC Builder platform for the NPC you want to use:
+- **Game ID** – the ID of your game project (you would have noted this when setting up credentials).
+- **World ID** (and possibly Region/Location ID if context is used) – where your NPC is located. If your NPC was created under a specific world, use that.
+- **Character Name** or **Character ID** – identify which NPC character to engage (you can use the character's name as defined on the platform, or a unique ID if provided).
+<br/>*(The NPCBuilderInteractions component or scripts will need to know these to send the right info. For simplicity, you might hardcode them in a script or retrieve from a config.)*
+![NPC Builder web portal showing game and world identifiers](./images/npcbuilder-ids.png)
+</Step>
+<Step title="Initiate an NPC Interaction via Script">
+Create a Unity C# script (e.g., **ApiInteractionsExample.cs**) and attach it to the same GameObject with **NPCBuilderInteractions**. This script will initialize the conversation. For example:
+
+```csharp
+using UnityEngine;
+using NPCBuilder; // Namespace from the plugin
+
+public class ApiInteractionsExample : MonoBehaviour {
+    private NPCBuilderInteractions npcBuilder;
+    
+    void Awake() {
+        // Get the NPCBuilderInteractions component on this object
+        npcBuilder = GetComponent<NPCBuilderInteractions>();
+        // Subscribe to the OnMessageReceived event to handle responses
+        npcBuilder.OnMessageReceived += OnNPCMessageReceived;
+        // Start an interaction with the NPC (user says "Hello")
+        npcBuilder.StartInteraction(ConversationRole.User, "Hello there!");
+    }
+
+    // This method gets called whenever the NPC sends a message back
+    private void OnNPCMessageReceived(System.Collections.Generic.List<Message> conversation) {
+        // For demo, just log the latest NPC reply
+        Debug.Log("NPC says: " + conversation[conversation.Count-1].content);
+    }
+}
+```
+
+In the above script:
+- We grab the `NPCBuilderInteractions` component.
+- We subscribe to an event `OnMessageReceived` which triggers every time the NPC responds.
+- We initiate the conversation by calling `StartInteraction(ConversationRole.User, "Hello there!")`. This sends a user message *"Hello there!"* to the NPC. The plugin in turn contacts the NPC Builder API.
+- When a response comes back from the NPC, our `OnNPCMessageReceived` handler is called. In this example, we simply log the NPC's reply to the Unity Console.
+<br/><br/>
+After playing the scene, you should see the NPC's response appear in the Console (and any events, if triggered). Each subsequent call to `StartInteraction` will continue the dialogue (remember, the plugin keeps track of the conversation context).
+![Unity Console showing NPC Builder conversation output](./images/unity-console-response.png)
+</Step>
+</Steps>
+
+At this point, you have a basic integration: your game sends a message to the NPC and logs the response. You can extend this by connecting the input/output to your game's UI (for example, capture player chat input and display NPC replies in a dialogue box). The NPCBuilderInteractions component ensures that conversation context (previous messages) is maintained as long as you keep using the same component and session.
+
+Events
+
+One powerful feature of NPC Builder is Events – these allow NPC interactions to trigger in-game actions or vice versa. Events can represent things like an NPC performing an action or the player giving an item. The NPC Builder system distinguishes between Action Events and Item Events to provide more gameplay hooks. What are events? In NPC Builder, an event is a label for something that happens (often alongside dialogue). For example, an NPC's response might include an event named "give_item" indicating the NPC hands something to the player, or a player message might trigger an event "wave" meaning the player waved at the NPC. By configuring events, you can tie these into actual game mechanics.
+
+Event Types
+
+Action Events: Events that involve an action without a specific item attached. These are like verbs – e.g., an NPC follows the player, or bows. They can be triggered by either the NPC or player.
+
+Item Events: Events that involve an action with an item. For example, giving or receiving an object. An NPC might trigger an item event "give_sword" to hand a sword item to the player. The event includes an item reference.
+
+Configuring Events on the NPC Builder Platform
+
+To make use of events in your game, you first define them on the NPC Builder platform (in the web app). There are two ways to configure events and items in NPC Builder:
+
+1. Define Globally (Reusable events/items): You can create a library of events and items in the Settings (or global collections) section of NPC Builder. Events defined globally can be reused by any character in any game. For instance, you define an event "wave" globally once, and then multiple NPCs can trigger "wave" without redefining it each time.
+
+2. Define per Character: You can also add events or items directly to a specific character's configuration. In the NPC's detail page on the platform, you might find options to "Add New Event" or "Add New Item" under that character. These are local to the character. Use this when an event is very specific to one NPC.
+
+After defining events (either globally or per character), you can also link global events to a character. The platform typically provides a "Link from Repo" or similar button where you can select an event or item from your global list and associate it with the character. This way you don't have to recreate it for each NPC – just link it.
+
+(In the UI, "Link from Repo" allows you to attach a globally defined event or item to the character's list of usable events/items.)
+
+Event and Item Properties
+
+Whether global or per-character, each Event and Item has some properties you can configure:
+
+Event Definition:
+- Name/UID: A unique identifier for the event (e.g., "wave" or "attack"). This is the string that will appear in the API responses under user_events or character_events.
+- Description: (Optional) A human-readable description of what the event represents. This can be helpful for remembering the intent (e.g., "NPC waves at the player").
+- Type: You must specify if an event is an Action or an Item type:
+  - Action: A standalone action. It's just an event with a name/description (the NPC or user does something without involving an inventory item).
+  - Item: An event that involves an item. If you choose Item type, you will likely link an actual item from the Item list (see below) to define what item is involved when this event triggers.
+
+Item Definition:
+- Name/UID: A unique identifier for the item (e.g., "Healing Potion" or "Gold Coin").
+- Description: A description of the item.
+- Type: You might categorize items by purpose:
+  - Trade: Items meant for trading or exchange events.
+  - Action: Items that have a direct use or action in the storyline (e.g., a key item needed to progress a quest).
+
+When you configure these on the platform, the NPC Builder plugin will simply receive event names in responses. It's up to your game logic to decide what to do when an event is received. For instance, if you get an event "give_potion" from the NPC's response, you might script your game to grant a potion item to the player's inventory.
+
+Using Events in Unity (Inspector Integration)
+
+Back in Unity, the NPCBuilderInteractions component can use the events you've defined:
+
+In the Inspector for an NPC with NPCBuilderInteractions, you may see fields to list possible events and items (depending on how the plugin is set up). Ensure the event names you intend to use are recognized or configured in the component (some plugins allow you to input event names in the inspector, others just handle any event string generically).
+
+When writing code, you can subscribe to the OnMessageReceived event (as shown above) to catch events. Each Message in the conversation list may include associated event info (depending on the plugin's data structures). Check the plugin documentation for how events are represented in the Unity API. It might be something like message.eventName or a separate callback.
+
+For example, the Unity plugin provides a callback for when it needs to associate a GameObject to an item event. If your NPC triggers an event that involves an item, you might want to spawn or reference a particular GameObject in the scene. The plugin exposes a delegate to handle that:
+
+```csharp
+// Example: Linking a GameObject to an event through the plugin
+npcBuilder.getGameObjectAssociatedToEvent += (GameObject obj) =>
+{
+    if (obj != null)
+    {
+        // The plugin is providing the GameObject associated with an event (if any).
+        // You can capture it here. For example, assign it to a variable for later use.
+        associatedItemObject = obj;
+    }
+};
+```
+
+In the above snippet, whenever the plugin determines what GameObject is linked to a triggered item event, it will call our provided lambda. (The actual usage of this may depend on how the plugin expects you to assign GameObjects to events in the Inspector. This is just to illustrate hooking into the event system programmatically.)
+
+Putting It All Together
+
+With events configured on the platform and handled in your game, your NPCs can now do more than talk – they can act. For instance, if the player says "Here, take this sword," your game could trigger a user event "give_sword". The NPC's response might trigger a character event "take_sword", and you could have your NPC's character model play a "taking item" animation in Unity when that event is received. The possibilities depend on how you define the events and handle them in Unity. By leveraging NPC Builder's context and events, your NPCs become truly interactive, responding not only with dialogue but with meaningful game actions. This creates a more immersive and responsive gaming experience, powered by both AI and your own game logic.

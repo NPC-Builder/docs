@@ -2,3 +2,8 @@
   width: 200px; /* Adjust this value as needed */
   height: auto;
 }
+
+#card img {
+    widh: 80px;
+    height: auto;
+}
