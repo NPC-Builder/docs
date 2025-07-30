@@ -4,7 +4,7 @@
   "name": "NPC Builder",
   "colors": {
     "primary": "#359BFA",
-    "light": "#99ccfc",
+    "light": "#359BFA",
     "dark": "#0568c4"
   },
   "favicon": "/favicon.svg",
