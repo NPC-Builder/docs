@@ -167,6 +167,11 @@
       {
         "label": "Support",
         "href": "mailto:support@npcbuilder.com"
+      },
+      {
+        "label": "Subscribe",
+        "href": "https://npcbuilder.com/plans",
+        "icon": "calendar-check"
       }
     ],
     "primary": {
