@@ -1,0 +1,2155 @@
+openapi: 3.0.3
+info:
+  title: NPC Builder - API
+  description: >
+    Esta es la especificación más reciente de la API de NPC Builder que define una API integral y lista para producción para NPC Builder. La API se divide en tres servicios principales:
+
+
+    **Servicio de Interacciones**  
+      - **Propósito:** Permite conversaciones dinámicas y con conciencia de contexto entre jugadores y personajes NPC.
+
+
+    **Servicio de Contexto**  
+      - **Propósito:** Gestiona entidades del juego para construir y mantener entornos inmersivos.
+      - **Incluye:**  
+        - **Mundos:** Crear, actualizar y eliminar mundos del juego.
+        - **Regiones:** Definir y gestionar regiones dentro de un mundo.
+        - **Localizaciones:** Gestionar ubicaciones específicas dentro de las regiones.
+        - **Personajes:** Gestionar el ciclo de vida (creación, actualización, eliminación) de personajes NPC.
+
+
+    **Servicio de Sesiones**  
+      - **Propósito:** Gestiona sesiones de jugadores para mantener el contexto del juego y rastrear interacciones.
+
+
+    En conjunto, esta especificación sirve como una guía detallada para aprovechar los servicios de NPC Builder—permitiendo a los desarrolladores crear experiencias ricas e interactivas mientras gestionan de forma eficiente contextos y entidades del juego.
+        _Debes ceñirte a la estructura de datos definida; de lo contrario puedes encontrar errores no controlados_
+
+
+    **Consulta los esquemas de cada solicitud para encontrar los valores permitidos de ciertas propiedades.**
+
+
+    _Limitaciones técnicas: La actualización y eliminación del conocimiento y las relaciones de los personajes no están disponibles a través de la API. Deben gestionarse desde el frontend de nuestra aplicación._
+
+
+    Algunos enlaces útiles:
+
+    - [Nuestro sitio web](https://npcbuilder.com)
+
+    - [La app](https://app.npcbuilder.com)
+    
+  termsOfService: https://npcbuilder.com/terms-and-conditions/
+  contact:
+    email: support@npcbuilder.com
+  version: 1.5.0
+servers:
+  - url: https://app.npcbuilder.com/api
+tags:
+  - name: Interactions
+    description: Gestiona las conversaciones de texto de tus NPCs y sus respuestas interactivas.
+  - name: Characters
+    description: Gestiona personajes de tu juego, incluyendo creación, actualización y eliminación.
+  - name: Worlds
+    description: Crea y gestiona mundos inmersivos para tu juego.
+  - name: Regions
+    description: Define y gestiona regiones dentro de tus mundos.
+  - name: Locations
+    description: Gestiona ubicaciones específicas dentro de las regiones de tu juego.
+  - name: Sessions
+    description: Crea, recupera y elimina sesiones de jugadores para una mejor gestión del juego.
+paths:
+  /interactions:
+    post:
+      tags:
+        - Interactions
+      summary: Obtener una respuesta de un personaje NPC
+      description: >
+        Envía un array de mensajes de interacción entre el jugador y el personaje NPC.
+        La API procesa el historial de conversación y devuelve una nueva respuesta generada por el personaje.
+      operationId: addInteraction
+      parameters:
+        - name: language
+          in: query
+          description: >
+            El código de idioma para la interacción. Valores admitidos:
+            - **en-US**: Inglés (Estados Unidos)
+            - **es-ES**: Español (España)
+          required: true
+          schema:
+            type: string
+            enum:
+              - en-US
+              - es-ES
+            example: en-US
+        - name: session_id
+          in: query
+          description: (Opcional) El identificador único de la sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        description: >
+          Una carga útil en JSON, XML o codificada en URL que contiene el historial completo de la conversación. 
+          Asegúrate de enviar los mensajes como un array de objetos siguiendo el esquema definido.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Interaction'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Interaction'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Interaction'
+        required: true
+      responses:
+        '200':
+          description: >
+            Operación exitosa. Devuelve la respuesta del personaje junto con cualquier evento de usuario desencadenado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '206':
+          description: >
+            Contenido parcial por alcanzar la longitud máxima. La respuesta puede estar truncada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxLength'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/MaxLength'
+        '401':
+          description: No autorizado – No se proporcionó un token válido.
+          content:
+            application/json:
+              example: "No autorizado, no se proporcionó token"
+        '403':
+          description: Prohibido – Se proporcionó un token inválido. Intenta generar un token nuevo.
+          content:
+            application/json:
+              example: "No autorizado, token inválido. Intenta generar un token nuevo."
+        '409':
+          description: >
+            Conflicto – Operación no permitida debido a límites de uso, objetos inexistentes o funciones no implementadas.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorNoContext'
+                  - $ref: '#/components/schemas/ErrorUsageLimit'
+                  - $ref: '#/components/schemas/ErrorNotImplemented'
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al procesar la interacción.
+          content:
+            application/json:
+              example: "Error al crear la interacción"
+      security:
+        - npcbuilder_auth: []
+  /context/characters/{game_id}/{world_id}/{character_id}:
+    post:
+      summary: Crear un nuevo personaje
+      tags:
+        - Characters
+      description: >
+        Crea un nuevo personaje dentro del juego y mundo especificados.
+        Proporciona detalles como edad, descripción, género, objetos, eventos, misiones, rol, tono y rasgos.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: character_id
+          in: path
+          required: true
+          description: El identificador único del personaje.
+          schema:
+            type: string
+            example: "character789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los datos necesarios del personaje para crearlo.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                age:
+                  type: string
+                  description: La categoría de edad del personaje.
+                  enum:
+                    - infant
+                    - child
+                    - teenager
+                    - youngAdult
+                    - adult
+                    - middleAged
+                    - elderly
+                  example: "adult"
+                description:
+                  type: string
+                  description: Una breve descripción de los antecedentes del personaje.
+                  example: "Un valiente guerrero con un pasado misterioso."
+                gender:
+                  type: string
+                  description: El género del personaje.
+                  example: "Male"
+                model:
+                  type: string
+                  description: El modelo de IA usado para las interacciones del personaje. Los modelos premium solo están disponibles para algunas suscripciones.
+                  enum: 
+                    - standard
+                    - premium
+                  example: "standard"
+                filters:
+                  type: boolean
+                  description: >
+                    Indicador de si se aplican filtros a las respuestas del personaje.
+                    Los filtros pueden usarse para restringir ciertos tipos de contenido o lenguaje.
+                  enum:
+                    - true
+                    - false
+                  example: true
+                items:
+                  type: array
+                  description: >
+                    Lista de objetos asociados al personaje.
+                    Cada objeto debe seguir uno de los esquemas predefinidos según su tipo.
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: El tipo de objeto, que determina su esquema.
+                        enum:
+                          - trade
+                          - action
+                        example: "trade"
+                    required:
+                      - type
+                    oneOf:
+                      - description: Esquema para objetos de tipo "trade"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - trade
+                            example: "trade"
+                          itemName:
+                            type: string
+                            description: El nombre del objeto de intercambio.
+                            example: "Sword"
+                          description:
+                            type: string
+                            description: Una descripción detallada del objeto.
+                            example: "Una espada afilada."
+                          unit:
+                            type: string
+                            description: La unidad en la que se mide el objeto.
+                            example: "Pieza"
+                          value:
+                            type: string
+                            description: El valor o coste del objeto.
+                            example: "100"
+                        required:
+                          - itemName
+                          - unit
+                          - value
+                      - description: Esquema para objetos de tipo "action"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - action
+                            example: "action"
+                          itemName:
+                            type: string
+                            description: El nombre del objeto de acción.
+                            example: "Move"
+                          description:
+                            type: string
+                            description: Una descripción de la acción.
+                            example: "Mover a una posición"
+                        required:
+                          - itemName
+                          - description
+                events:
+                  type: array
+                  description: >
+                    Lista de eventos asociados al personaje.
+                    Cada evento debe ajustarse al esquema definido para su tipo.
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: El tipo de evento.
+                        enum:
+                          - item
+                          - action
+                        example: "item"
+                    required:
+                      - type
+                    oneOf:
+                      - description: Esquema para eventos de tipo "action"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - action
+                            example: "action"
+                          eventName:
+                            type: string
+                            description: El nombre del evento.
+                            example: "Attack"
+                          description:
+                            type: string
+                            description: Detalles del evento.
+                            example: "Acto de violencia contra otra persona."
+                        required:
+                          - eventName
+                      - description: Esquema para eventos de tipo "item"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - item
+                            example: "item"
+                          eventName:
+                            type: string
+                            description: El nombre del evento.
+                            example: "Give"
+                          description:
+                            type: string
+                            description: Detalles del evento.
+                            example: "Proporcionar un objeto a una persona."
+                        required:
+                          - eventName
+                name:
+                  type: string
+                  description: El nombre visible del personaje.
+                  example: "Aragorn"
+                quests:
+                  type: array
+                  description: Una lista de misiones asociadas al personaje.
+                  items:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                        description: Breve descripción de la misión.
+                        example: "Recupera el artefacto perdido."
+                      objective:
+                        type: string
+                        description: El objetivo principal de la misión.
+                        example: "Encontrar y devolver el artefacto."
+                      reward:
+                        type: string
+                        description: La recompensa por completar la misión.
+                        example: "500 monedas de oro"
+                role:
+                  type: string
+                  description: >
+                    El rol del personaje en el juego. Determina cómo interactúa con la historia.
+                  enum:
+                    - noRole
+                    - protagonist
+                    - antagonist
+                    - secondaryCharacter
+                    - tertiaryCharacter
+                    - mentor
+                    - enemy
+                    - villain
+                    - rival
+                    - shopkeeper
+                    - healer
+                    - questGiver
+                    - innkeeper
+                    - guard
+                    - familyMember
+                    - loveInterest
+                    - scientist
+                    - politician
+                    - criminal
+                    - explorer
+                    - wizard
+                    - ghost
+                    - animalCompanion
+                    - artificialIntelligence
+                  example: "protagonist"
+                tone:
+                  type: string
+                  description: El tono o estilo del diálogo del personaje.
+                  enum:
+                    - formal
+                    - casual
+                    - sarcastic
+                    - mysterious
+                    - emotive
+                  example: "mysterious"
+                traits:
+                  type: array
+                  description: Lista de rasgos de personalidad que describen al personaje.
+                  items:
+                    type: string
+                    example: "brave"
+      responses:
+        '200':
+          description: Personaje creado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación con detalles del personaje.
+                    example: "Personaje: character789 ha sido creado con el siguiente contexto."
+                  character_id:
+                    type: string
+                    description: UID del personaje.
+                    example: "character789"
+                  character_context:
+                    type: object
+                    description: El contexto del personaje creado.
+                    example:
+                      age: "adult"
+                      description: "Un valiente guerrero con un pasado misterioso."
+                      gender: "Male"
+                      items:
+                        - itemName: "Sword"
+                          unit: "Pieza"
+                          value: "100"
+                      name: "Aragorn"
+                      quests:
+                        - description: "Recupera el artefacto perdido."
+                          objective: "Encontrar y devolver el artefacto."
+                          reward: "500 monedas de oro"
+                      role: "protagonist"
+                      tone: "mysterious"
+                      traits: ["brave"]
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no coincide con el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – No se encontró el contexto del juego, mundo o personaje especificado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles razones.
+                    example: |
+                      Posibles razones:
+                      - Personaje no encontrado
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al crear el personaje.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    patch:
+      summary: Actualizar detalles del personaje
+      tags:
+        - Characters
+      description: >
+        Actualiza los detalles de un personaje existente.
+        Proporciona cualquiera de los campos actualizables como edad, descripción, género, objetos, eventos, misiones, rol, tono o rasgos.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: character_id
+          in: path
+          required: true
+          description: El identificador único del personaje.
+          schema:
+            type: string
+            example: "character789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los campos de datos del personaje a actualizar.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                age:
+                  type: string
+                  description: La categoría de edad del personaje.
+                  enum:
+                    - infant
+                    - child
+                    - teenager
+                    - youngAdult
+                    - adult
+                    - middleAged
+                    - elderly
+                  example: "adult"
+                description:
+                  type: string
+                  description: Una breve descripción del personaje.
+                  example: "Un valiente guerrero con un pasado misterioso."
+                gender:
+                  type: string
+                  description: El género del personaje.
+                  example: "Male"
+                model:
+                  type: string
+                  description: El modelo de IA usado para las interacciones del personaje. Los modelos premium solo están disponibles para algunas suscripciones.
+                  enum: 
+                    - standard
+                    - premium
+                  example: "standard"
+                filters:
+                  type: boolean
+                  description: >
+                    Indicador de si se aplican filtros a las respuestas del personaje.
+                    Los filtros pueden usarse para restringir ciertos tipos de contenido o lenguaje.
+                  enum:
+                    - true
+                    - false
+                  example: true
+                items:
+                  type: array
+                  description: Lista actualizada de objetos del personaje.
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: El tipo de objeto.
+                        enum:
+                          - trade
+                          - action
+                        example: "trade"
+                    required:
+                      - type
+                    oneOf:
+                      - description: Esquema para objetos de tipo "trade"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - trade
+                            example: "trade"
+                          itemName:
+                            type: string
+                            description: El nombre del objeto de intercambio.
+                            example: "Sword"
+                          description:
+                            type: string
+                            description: Una descripción detallada del objeto.
+                            example: "Una espada afilada."
+                          unit:
+                            type: string
+                            description: La unidad de medida.
+                            example: "Pieza"
+                          value:
+                            type: string
+                            description: El coste o valor del objeto.
+                            example: "100"
+                        required:
+                          - itemName
+                          - unit
+                          - value
+                      - description: Esquema para objetos de tipo "action"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - action
+                            example: "action"
+                          itemName:
+                            type: string
+                            description: El nombre de la acción.
+                            example: "Move"
+                          description:
+                            type: string
+                            description: Una descripción de la acción.
+                            example: "Mover a una posición"
+                        required:
+                          - itemName
+                          - description
+                events:
+                  type: array
+                  description: Lista de eventos relacionados con el personaje.
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: El tipo de evento.
+                        enum:
+                          - item
+                          - action
+                        example: "item"
+                    required:
+                      - type
+                    oneOf:
+                      - description: Esquema para eventos de tipo "action"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - action
+                            example: "action"
+                          eventName:
+                            type: string
+                            description: El nombre del evento.
+                            example: "Attack"
+                          description:
+                            type: string
+                            description: Descripción detallada del evento.
+                            example: "Acto de violencia contra otra persona."
+                        required:
+                          - eventName
+                      - description: Esquema para eventos de tipo "item"
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - item
+                            example: "item"
+                          eventName:
+                            type: string
+                            description: El nombre del evento.
+                            example: "Give"
+                          description:
+                            type: string
+                            description: Descripción detallada del evento.
+                            example: "Entregar un objeto a una persona."
+                        required:
+                          - eventName
+                name:
+                  type: string
+                  description: El nombre visible del personaje.
+                  example: "Aragorn"
+                quests:
+                  type: array
+                  description: Una lista de misiones asociadas al personaje.
+                  items:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                        description: Breve descripción de la misión.
+                        example: "Recupera el artefacto perdido."
+                      objective:
+                        type: string
+                        description: El objetivo principal de la misión.
+                        example: "Encontrar y devolver el artefacto."
+                      reward:
+                        type: string
+                        description: La recompensa por completar la misión.
+                        example: "500 monedas de oro"
+                role:
+                  type: string
+                  description: El rol que desempeña el personaje en el juego.
+                  enum:
+                    - noRole
+                    - protagonist
+                    - antagonist
+                    - secondaryCharacter
+                    - tertiaryCharacter
+                    - mentor
+                    - enemy
+                    - villain
+                    - rival
+                    - shopkeeper
+                    - healer
+                    - questGiver
+                    - innkeeper
+                    - guard
+                    - familyMember
+                    - loveInterest
+                    - scientist
+                    - politician
+                    - criminal
+                    - explorer
+                    - wizard
+                    - ghost
+                    - animalCompanion
+                    - artificialIntelligence
+                  example: "protagonist"
+                tone:
+                  type: string
+                  description: El estilo o estado de ánimo del diálogo del personaje.
+                  enum:
+                    - formal
+                    - casual
+                    - sarcastic
+                    - mysterious
+                    - emotive
+                  example: "mysterious"
+                traits:
+                  type: array
+                  description: Lista de rasgos de personalidad del personaje.
+                  items:
+                    type: string
+                    example: "brave"
+      responses:
+        '200':
+          description: Personaje actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras actualizar el personaje.
+                    example: "Personaje: character789 ha sido actualizado con el siguiente contexto."
+                  character_id:
+                    type: string
+                    description: UID del personaje.
+                    example: "character789"
+                  character_context:
+                    type: object
+                    description: Datos del contexto del personaje actualizados.
+                    example:
+                      age: "adult"
+                      description: "Un valiente guerrero con un pasado misterioso."
+                      gender: "Male"
+                      items:
+                        - itemName: "Sword"
+                          unit: "Pieza"
+                          value: "100"
+                      name: "Aragorn"
+                      quests:
+                        - description: "Recupera el artefacto perdido."
+                          objective: "Encontrar y devolver el artefacto."
+                          reward: "500 monedas de oro"
+                      role: "protagonist"
+                      tone: "mysterious"
+                      traits: ["brave"]
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no cumple los requisitos del esquema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – El personaje o su contexto especificado no existe.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles razones.
+                    example: |
+                      Posibles razones:
+                      - Personaje no encontrado
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al actualizar el personaje.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    delete:
+      summary: Eliminar un personaje
+      tags:
+        - Characters
+      description: >
+        Elimina un personaje del juego y mundo especificados.
+        Usa esta operación con precaución, ya que elimina el personaje de forma permanente.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: character_id
+          in: path
+          required: true
+          description: El identificador único del personaje a eliminar.
+          schema:
+            type: string
+            example: "character789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Personaje eliminado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras la eliminación.
+                    example: "Personaje: character789 ha sido eliminado."
+                  character_id:
+                    type: string
+                    description: UID del personaje.
+                    example: "character789"
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al eliminar el personaje.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+  /context/world/{game_id}:
+    post:
+      summary: Crear un nuevo mundo
+      tags:
+        - Worlds
+      description: >
+        Crea un nuevo mundo dentro del juego.
+        Proporciona detalles del mundo como trasfondo (lore), nombre, criaturas y mundos similares como referencia.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los datos necesarios del mundo para crearlo.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lore:
+                  type: string
+                  description: Trasfondo o historia del mundo.
+                  example: "Un mundo donde la magia y la tecnología coexisten."
+                name:
+                  type: string
+                  description: El nombre del mundo.
+                  example: "Eldoria"
+                creatures:
+                  type: string
+                  description: Lista separada por comas de las criaturas que habitan el mundo.
+                  example: "Dragons, Elves"
+                similarWorlds:
+                  type: array
+                  description: Lista de mundos similares en temática o estilo.
+                  items:
+                    type: string
+                    example: "Middle Earth"
+      responses:
+        '200':
+          description: Mundo creado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación de creación del mundo.
+                    example: "Mundo: world456 ha sido creado con el siguiente contexto."
+                  world_id:
+                    type: string
+                    description: UID del mundo.
+                    example: "world456"
+                  world_context:
+                    type: object
+                    description: Detalles del contexto del mundo creado.
+                    example:
+                      lore: "Un mundo donde la magia y la tecnología coexisten."
+                      name: "Eldoria"
+                      creatures: "Dragons, Elves"
+                      similarWorlds:
+                        - "Middle Earth"
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no coincide con el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – No se encontró el contexto del juego especificado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles causas.
+                    example: |
+                      - Mundo con ID [...] no encontrado
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al crear el mundo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+  /context/world/{game_id}/{world_id}:
+    patch:
+      summary: Actualizar detalles del mundo
+      tags:
+        - Worlds
+      description: >
+        Actualiza los detalles de un mundo existente. Modifica campos como trasfondo, nombre, criaturas y mundos similares.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los campos del mundo que se van a actualizar.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lore:
+                  type: string
+                  description: Trasfondo actualizado del mundo.
+                  example: "Un mundo donde la magia y la tecnología coexisten."
+                name:
+                  type: string
+                  description: Nombre actualizado del mundo.
+                  example: "Eldoria"
+                creatures:
+                  type: string
+                  description: Lista actualizada de criaturas.
+                  example: "Dragons, Elves"
+                similarWorlds:
+                  type: array
+                  description: Lista actualizada de mundos similares.
+                  items:
+                    type: string
+                    example: "Middle Earth"
+      responses:
+        '200':
+          description: Mundo actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras actualizar el mundo.
+                    example: "Mundo: world456 ha sido actualizado con el siguiente contexto."
+                  world_id:
+                    type: string
+                    description: UID del mundo.
+                    example: "world456"
+                  world_context:
+                    type: object
+                    description: Detalles del contexto del mundo creado.
+                    example:
+                      lore: "Un mundo donde la magia y la tecnología coexisten."
+                      name: "Eldoria"
+                      creatures: "Dragons, Elves"
+                      similarWorlds:
+                        - "Middle Earth"
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no cumple el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – No se encontró el mundo especificado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles razones.
+                    example: |
+                      Posibles razones:
+                      - Mundo con ID [...] no encontrado
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al actualizar el mundo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    delete:
+      summary: Eliminar un mundo
+      tags:
+        - Worlds
+      description: >
+        Elimina un mundo del juego. Esta operación elimina de forma permanente el mundo y sus datos asociados.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo a eliminar.
+          schema:
+            type: string
+            example: "world456"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Mundo eliminado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras la eliminación.
+                    example: "Mundo: world456 ha sido eliminado."
+                  world_id:
+                    type: string
+                    description: UID del mundo.
+                    example: "world456"
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al eliminar el mundo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+  /context/region/{game_id}/{world_id}/{region_id}:
+    post:
+      summary: Crear una nueva región
+      tags:
+        - Regions
+      description: >
+        Crea una nueva región dentro del mundo especificado.
+        Proporciona detalles como trasfondo, nombre, clima, cultura y estabilidad política.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: region_id
+          in: path
+          required: true
+          description: El identificador único de la región.
+          schema:
+            type: string
+            example: "region789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los datos necesarios de la región para crearla.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lore:
+                  type: string
+                  description: Trasfondo de la región.
+                  example: "Un bosque denso con secretos ocultos."
+                name:
+                  type: string
+                  description: El nombre de la región.
+                  example: "Bosque Místico"
+                weather:
+                  type: string
+                  description: Condiciones climáticas típicas en la región.
+                  example: "Lluvioso"
+                culture:
+                  type: string
+                  description: Aspectos culturales o tradiciones de la región.
+                  example: "Tradiciones druídicas"
+                politicalStability:
+                  type: string
+                  description: El estado de estabilidad política de la región.
+                  enum:
+                    - none
+                    - highlyStable
+                    - stable
+                    - moderatelyStable
+                    - unstable
+                    - highlyUnstable
+                    - anarchy
+                  example: "stable"
+      responses:
+        '200':
+          description: Región creada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación de creación de la región.
+                    example: "Región: region789 ha sido creada con el siguiente contexto."
+                  region_id:
+                    type: string
+                    description: UID de la región.
+                    example: "region789"
+                  region_context:
+                    type: object
+                    description: Detalles del contexto de la región creada.
+                    example:
+                      lore: "Un bosque denso con secretos ocultos."
+                      name: "Bosque Místico"
+                      weather: "Lluvioso"
+                      culture: "Tradiciones druídicas"
+                      politicalStability: "stable"
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no cumple el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – No se encontró el contexto del mundo o del juego especificado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles razones.
+                    example: |
+                      Posibles razones:
+                      - Región con ID [...] no encontrada
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al crear la región.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    patch:
+      summary: Actualizar detalles de la región
+      tags:
+        - Regions
+      description: >
+        Actualiza los detalles de una región existente. Modifica campos como trasfondo, nombre, clima, cultura y estabilidad política.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: region_id
+          in: path
+          required: true
+          description: El identificador único de la región.
+          schema:
+            type: string
+            example: "region789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los campos de la región que se van a actualizar.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lore:
+                  type: string
+                  description: Trasfondo actualizado de la región.
+                  example: "Un bosque denso con secretos ocultos."
+                name:
+                  type: string
+                  description: Nombre actualizado de la región.
+                  example: "Bosque Místico"
+                weather:
+                  type: string
+                  description: Condiciones climáticas actualizadas.
+                  example: "Lluvioso"
+                culture:
+                  type: string
+                  description: Aspectos culturales actualizados.
+                  example: "Tradiciones druídicas"
+                politicalStability:
+                  type: string
+                  description: Estado de estabilidad política actualizado.
+                  enum:
+                    - none
+                    - highlyStable
+                    - stable
+                    - moderatelyStable
+                    - unstable
+                    - highlyUnstable
+                    - anarchy
+                  example: "stable"
+      responses:
+        '200':
+          description: Región actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras la actualización de la región.
+                    example: "Región: region789 ha sido actualizada con el siguiente contexto."
+                  region_id:
+                    type: string
+                    description: UID de la región.
+                    example: "region789"
+                  region_context:
+                    type: object
+                    description: Detalles del contexto de la región creada.
+                    example:
+                      lore: "Un bosque denso con secretos ocultos."
+                      name: "Bosque Místico"
+                      weather: "Lluvioso"
+                      culture: "Tradiciones druídicas"
+                      politicalStability: "stable"
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no cumple el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – No se encontró la región especificada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles razones.
+                    example: |
+                      Posibles razones:
+                      - Región con ID [...] no encontrada
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al actualizar la región.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    delete:
+      summary: Eliminar una región
+      tags:
+        - Regions
+      description: >
+        Elimina una región existente del mundo especificado.
+        Esta operación elimina de forma permanente la región y sus datos relacionados.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: region_id
+          in: path
+          required: true
+          description: El identificador único de la región a eliminar.
+          schema:
+            type: string
+            example: "region789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Región eliminada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras la eliminación.
+                    example: "Región: region789 ha sido eliminada."
+                  region_id:
+                    type: string
+                    description: UID de la región.
+                    example: "region789"
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al eliminar la región.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+  /context/location/{game_id}/{world_id}/{location_id}:
+    post:
+      summary: Crear una nueva localización
+      tags:
+        - Locations
+      description: >
+        Crea una nueva localización dentro del mundo especificado.
+        Proporciona detalles de la localización como trasfondo, nombre y rol.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: location_id
+          in: path
+          required: true
+          description: El identificador único de la localización.
+          schema:
+            type: string
+            example: "location789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los datos necesarios de la localización para crearla.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lore:
+                  type: string
+                  description: Trasfondo o descripción de la localización.
+                  example: "Una bulliciosa ciudad mercantil."
+                name:
+                  type: string
+                  description: El nombre de la localización.
+                  example: "Rivertown"
+                role:
+                  type: string
+                  description: >
+                    El rol o función de la localización (p. ej., centro de comercio, zona residencial).
+                  example: "Centro de comercio"
+      responses:
+        '200':
+          description: Localización creada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras crear la localización.
+                    example: "Localización: location789 ha sido creada con el siguiente contexto."
+                  location_id:
+                    type: string
+                    description: UID de la localización.
+                    example: "location789"
+                  location_context:
+                    type: object
+                    description: Detalles del contexto de la localización creada.
+                    example:
+                      lore: "Una bulliciosa ciudad mercantil."
+                      name: "Rivertown"
+                      role: "Centro de comercio"
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no cumple el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – No se encontró el contexto de la localización especificada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles razones.
+                    example: |
+                      Posibles razones:
+                      - Localización con ID [...] no encontrada
+                      - Localización con ID [...] no encontrada en la región [...]
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al crear la localización.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    patch:
+      summary: Actualizar detalles de la localización
+      tags:
+        - Locations
+      description: >
+        Actualiza los detalles de una localización existente. Modifica campos como trasfondo, nombre y rol.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: location_id
+          in: path
+          required: true
+          description: El identificador único de la localización.
+          schema:
+            type: string
+            example: "location789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      requestBody:
+        required: true
+        description: Los campos de la localización que se van a actualizar.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lore:
+                  type: string
+                  description: Trasfondo actualizado de la localización.
+                  example: "Una bulliciosa ciudad mercantil."
+                name:
+                  type: string
+                  description: Nombre actualizado de la localización.
+                  example: "Rivertown"
+                role:
+                  type: string
+                  description: Rol actualizado de la localización.
+                  example: "Centro de comercio"
+      responses:
+        '200':
+          description: Localización actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras actualizar la localización.
+                    example: "Localización: location789 ha sido actualizada con el siguiente contexto."
+                  location_id:
+                    type: string
+                    description: UID de la localización.
+                    example: "location789"
+                  location_context:
+                    type: object
+                    description: Detalles del contexto de la localización creada.
+                    example:
+                      lore: "Una bulliciosa ciudad mercantil."
+                      name: "Rivertown"
+                      role: "Centro de comercio"
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud no cumple los requisitos del esquema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >
+            No encontrado – No se encontró la localización especificada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error con posibles razones.
+                    example: |
+                      Posibles razones:
+                      - Localización con ID [...] no encontrada
+                      - Localización con ID [...] no encontrada en la región [...]
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al actualizar la localización.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    delete:
+      summary: Eliminar una localización
+      tags:
+        - Locations
+      description: >
+        Elimina una localización existente del mundo especificado.
+        Esta operación elimina de forma permanente la localización y sus datos asociados.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: location_id
+          in: path
+          required: true
+          description: El identificador único de la localización a eliminar.
+          schema:
+            type: string
+            example: "location789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Localización eliminada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras la eliminación.
+                    example: "Localización: location789 ha sido eliminada."
+                  location_id:
+                    type: string
+                    description: UID de la localización.
+                    example: "location789"
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al eliminar la localización.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+  /sessionmanager:
+    post:
+      summary: Crear una nueva sesión
+      tags:
+        - Sessions
+      description: >
+        Crea una nueva sesión de jugador para un juego específico.
+        Una sesión vincula a un jugador con un contexto de juego y se usa para rastrear interacciones y contexto específico.
+      requestBody:
+        required: true
+        description: Los detalles de la sesión necesarios para crear una nueva sesión.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionRequest'
+      responses:
+        '200':
+          description: Sesión creada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación incluyendo los detalles de la sesión.
+                    example: "Sesión creada para la clave: campaign_nightfall con id: ABC123"
+                  session_key:
+                    type: string
+                  session_id:
+                    type: string
+                  player_id:
+                    type: string
+                    format: uuidv4
+        '400':
+          description: >
+            Error de validación – La carga útil de la solicitud de sesión no cumple el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflicto – La sesión ya existe.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje que indica que la sesión ya existe.
+                    example: "Sesión ya existente para la clave: campaign_nightfall. Por favor, elimínala antes de crear una nueva."
+                  session_id:
+                    type: string
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al crear la sesión.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    get:
+      summary: Recuperar información de una sesión
+      tags:
+        - Sessions
+      description: >
+        Recupera los detalles de una sesión existente usando la clave de sesión, el ID del juego y el ID del jugador.
+      parameters:
+        - in: query
+          name: session_key
+          description: La clave que identifica la sesión.
+          schema:
+            type: string
+            pattern: ^[a-zA-Z0-9_-]+$
+            maxLength: 50
+          required: true
+          example: "campaign_nightfall"
+        - in: query
+          name: game_id
+          description: El identificador único del juego.
+          schema:
+            type: string
+            maxLength: 50
+          required: true
+          example: "game_12345"
+        - in: query
+          name: player_id
+          description: El identificador único del jugador.
+          schema:
+            type: string
+            format: uuidv4
+          required: true
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Sesión recuperada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación con los detalles de la sesión.
+                    example: "Sesión para la clave: campaign_nightfall con id: ABC123"
+                  session_id:
+                    type: string
+                  session_key:
+                    type: string
+                  player_id:
+                    type: string
+                    format: uuidv4
+        '404':
+          description: >
+            No encontrado – No hay una sesión que coincida con los detalles proporcionados.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje indicando que no se encontró la sesión.
+                    example: "Sesión para la clave: campaign_nightfall no encontrada"
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al recuperar la sesión.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+    delete:
+      summary: Eliminar una sesión
+      tags:
+        - Sessions
+      description: >
+        Elimina una sesión existente usando la clave de sesión, el ID del juego y el ID del jugador.
+        Esta operación elimina la sesión de forma permanente.
+      parameters:
+        - in: query
+          name: session_key
+          description: La clave que identifica la sesión.
+          schema:
+            type: string
+            pattern: ^[a-zA-Z0-9_-]+$
+            maxLength: 50
+          required: true
+          example: "campaign_nightfall"
+        - in: query
+          name: game_id
+          description: El identificador único del juego.
+          schema:
+            type: string
+            maxLength: 50
+          required: true
+          example: "game_12345"
+        - in: query
+          name: player_id
+          description: El identificador único del jugador.
+          schema:
+            type: string
+            format: uuidv4
+          required: true
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Sesión eliminada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación tras la eliminación.
+                    example: "Sesión para la clave: campaign_nightfall con id: ABC123 ha sido eliminada"
+                  session_id:
+                    type: string
+        '500':
+          description: >
+            Error interno del servidor – Ocurrió un error al eliminar la sesión.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+components:
+  schemas:
+    Interaction:
+      type: object
+      description: >
+        El esquema Interaction define la estructura para una conversación entre un jugador y un NPC.
+        Incluye metadatos como ID del personaje, ID del juego, ID del mundo y un array de mensajes.
+      properties:
+        character_id:
+          type: string
+          description: El identificador único del personaje NPC.
+          example: "a96c6161-59f5-40f7-955e-459cd11"
+        game_id:
+          type: string
+          description: El identificador único del juego.
+          example: "tx65BrETVN2vMrrUIrlV"
+        world_id:
+          type: string
+          description: El identificador único del mundo.
+          example: "PtUYW5bLMZNnXPN8qAUJ"
+        messages:
+          type: array
+          description: Un array de mensajes intercambiados entre el jugador y el NPC.
+          xml:
+            name: messages
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Messages'
+        user_context:
+          type: object
+          description: Un objeto que contiene información específica del jugador para el contexto del personaje.
+          properties:
+            name:
+              type: string
+              description: El nombre del jugador.
+              example: "Juan"
+            age:
+              type: string
+              description: La edad del jugador.
+              example: "Adult"
+            gender:
+              type: string
+              description: El género del jugador.
+              example: "Male"
+            race:
+              type: string
+              description: La raza del jugador.
+              example: "Human"
+            class:
+              type: string
+              description: La clase del jugador.
+              example: "Warrior"
+            level:
+              type: integer
+              description: El nivel del jugador.
+              example: 5
+            status:
+              type: string
+              description: El estado del jugador.
+              example: "Healthy"
+            description:
+              type: string
+              description: Breve descripción del jugador usada para caracterizarlo o describir su estado.
+              example: "Huele mal, con una gran espada y una herida en el pecho"    
+      xml:
+        name: interaction
+    Messages:
+      type: object
+      description: >
+        Un objeto de mensaje que representa un único mensaje en la conversación.
+        El rol indica el remitente ('user' para mensajes del jugador, 'assistant' para respuestas del NPC) y 'content' contiene el texto.
+      properties:
+        role:
+          type: string
+          description: >
+            El rol del remitente del mensaje.
+            Usa 'user' para mensajes del jugador y 'assistant' para respuestas del NPC.
+          enum:
+            - user
+            - assistant
+          example: "user"
+        content:
+          type: string
+          description: El contenido de texto del mensaje.
+          example: "Hola Jakinen, me llamo Juan, ¡cogeré mi espada y bailaré!"
+      xml:
+        name: messages_user
+    ApiResponse:
+      type: object
+      description: >
+        El esquema ApiResponse representa la respuesta correcta de la API,
+        incluyendo la respuesta del NPC y cualquier evento desencadenado por el usuario.
+      properties:
+        response:
+          type: string
+          description: La respuesta generada por el NPC.
+          example: "Hola Juan, me llamo Jakinen"
+        user_events:
+          type: array
+          description: Una lista de eventos desencadenados por la entrada del usuario.
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: El nombre del evento.
+                example: "take"
+              item:
+                type: string
+                description: El objeto asociado al evento, si lo hay.
+                nullable: true
+                example: "sword"
+        character_events:
+          type: array
+          description: Una lista de eventos desencadenados por la entrada del usuario.
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: El nombre del evento.
+                example: "take"
+              item:
+                type: string
+                description: El objeto asociado al evento, si lo hay.
+                nullable: true
+                example: "sword"
+      example: 
+        response: "Hola Juan, me llamo Jakinen"
+        user_events:
+          - name: "take"
+            item: "sword"
+          - name: "dance"
+            item: null
+        character_events:
+          - name: "give"
+            item: "shield"
+          - name: "attack"
+            item: null
+    MaxLength:
+      type: object
+      description: >
+        El esquema MaxLength se utiliza cuando la respuesta ha sido truncada por alcanzar la longitud máxima permitida.
+      properties:
+        response:
+          type: string
+          description: La respuesta truncada del NPC.
+          example: "Hola Juan, me llamo Jakinen"
+        user_events:
+          type: array
+          description: Una lista de eventos desencadenados por la entrada del usuario.
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: El nombre del evento.
+                example: "take"
+              item:
+                type: string
+                description: El objeto asociado al evento.
+                nullable: true
+                example: "sword"
+      example:
+        response: "Hola Juan, me llamo Jakinen"
+        user_events:
+          - name: "take"
+            item: "sword"
+          - name: "dance"
+            item: null
+    ErrorNoContext:
+      type: string
+      description: >
+        Error que indica que no se ha definido un contexto de mundo.
+      example: "No hay un contexto de mundo definido."
+    ErrorUsageLimit:
+      type: string
+      description: >
+        Error que indica que se ha excedido el límite de uso.
+      example: "Límite de uso excedido. Revisa tu suscripción o el límite de interacciones."
+    ErrorNotImplemented:
+      type: string
+      description: >
+        Error que indica que la operación solicitada no está implementada.
+      example: "Aún no implementado."
+    ErrorResponse:
+      type: object
+      description: Esquema estándar de respuesta de error.
+      properties:
+        message:
+          type: string
+          description: Mensaje de error detallado.
+          example: "Ocurrió un error"
+    SessionRequest:
+      type: object
+      description: >
+        Esquema para crear una nueva sesión. Contiene la clave de sesión, el identificador del juego y el identificador del jugador.
+      properties:
+        session_key:
+          type: string
+          description: Una clave única para la sesión.
+          pattern: "^[a-zA-Z0-9_-]+$"
+          maxLength: 50
+          example: "campaign_nightfall"
+        game_id:
+          type: string
+          description: El identificador único del juego.
+          maxLength: 50
+          example: "game_12345"
+        player_id:
+          type: string
+          description: El identificador único del jugador.
+          format: uuidv4
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      required:
+        - session_key
+        - game_id
+        - player_id 
+  requestBodies:
+    Interaction:
+      description: >
+        El cuerpo de la solicitud Interaction que contiene los detalles de la conversación a enviar al NPC.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Interaction'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Interaction'
+  securitySchemes:
+    npcbuilder_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
