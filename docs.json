@@ -9,62 +9,6 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "tabs": [
-      {
-        "tab": "Guides",
-        "groups": [
-          {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API reference",
-        "groups": [
-          {
-            "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoints",
-            "openapi": {
-              "source": "api-reference/openapi.yaml"
-            }
-          }
-        ]
-      }
-    ],
     "global": {
       "anchors": [
         {
@@ -83,7 +27,135 @@
           "icon": "newspaper"
         }
       ]
-    }
+    },
+    "languages": [
+      {
+        "language": "en",
+        "dropdowns": [
+          {
+            "dropdown": "Guides",
+            "icon": "book",
+            "description": "How to use NPC Builder",
+            "pages": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "index",
+                  "quickstart",
+                  "development"
+                ]
+              },
+              {
+                "group": "Customization",
+                "pages": [
+                  "essentials/settings",
+                  "essentials/navigation"
+                ]
+              },
+              {
+                "group": "Writing content",
+                "pages": [
+                  "essentials/markdown",
+                  "essentials/code",
+                  "essentials/images",
+                  "essentials/reusable-snippets"
+                ]
+              },
+              {
+                "group": "AI tools",
+                "pages": [
+                  "ai-tools/cursor",
+                  "ai-tools/claude-code",
+                  "ai-tools/windsurf"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "API reference",
+            "icon": "code",
+            "description": "API documentation and endpoints",
+            "pages": [
+              {
+                "group": "API documentation",
+                "pages": [
+                  "api-reference/introduction"
+                ]
+              },
+              {
+                "group": "Endpoints",
+                "openapi": {
+                  "source": "api-reference/openapi.yaml"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "es",
+        "dropdowns": [
+          {
+            "dropdown": "Guías",
+            "icon": "book",
+            "description": "Cómo usar NPC Builder",
+            "pages": [
+              {
+                "group": "Primeros pasos",
+                "pages": [
+                  "es/index",
+                  "es/quickstart",
+                  "es/development"
+                ]
+              },
+              {
+                "group": "Personalización",
+                "pages": [
+                  "es/essentials/settings",
+                  "es/essentials/navigation"
+                ]
+              },
+              {
+                "group": "Redacción de contenido",
+                "pages": [
+                  "es/essentials/markdown",
+                  "es/essentials/code",
+                  "es/essentials/images",
+                  "es/essentials/reusable-snippets"
+                ]
+              },
+              {
+                "group": "Herramientas de IA",
+                "pages": [
+                  "es/ai-tools/cursor",
+                  "es/ai-tools/claude-code",
+                  "es/ai-tools/windsurf"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "Referencia de API",
+            "icon": "code",
+            "description": "Documentación de la API y endpoints",
+            "pages": [
+              {
+                "group": "Documentación de la API",
+                "pages": [
+                  "es/api-reference/introduction"
+                ]
+              },
+              {
+                "group": "Endpoints",
+                "openapi": {
+                  "source": "api-reference/openapi.yaml"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
