@@ -46,27 +46,10 @@
                 ]
               },
               {
-                "group": "Customization",
+                "group": "Game Engine Integration",
                 "pages": [
-                  "essentials/settings",
-                  "essentials/navigation"
-                ]
-              },
-              {
-                "group": "Writing content",
-                "pages": [
-                  "essentials/markdown",
-                  "essentials/code",
-                  "essentials/images",
-                  "essentials/reusable-snippets"
-                ]
-              },
-              {
-                "group": "AI tools",
-                "pages": [
-                  "ai-tools/cursor",
-                  "ai-tools/claude-code",
-                  "ai-tools/windsurf"
+                  "integrations/unity",
+                  "integrations/unreal"
                 ]
               }
             ]
@@ -79,7 +62,9 @@
               {
                 "group": "API documentation",
                 "pages": [
-                  "api-reference/introduction"
+                  "api-reference/introduction",
+                  "api-reference/uids",
+                  "api-reference/authentication"
                 ]
               },
               {
@@ -111,25 +96,8 @@
               {
                 "group": "Personalización",
                 "pages": [
-                  "es/essentials/settings",
-                  "es/essentials/navigation"
-                ]
-              },
-              {
-                "group": "Redacción de contenido",
-                "pages": [
-                  "es/essentials/markdown",
-                  "es/essentials/code",
-                  "es/essentials/images",
-                  "es/essentials/reusable-snippets"
-                ]
-              },
-              {
-                "group": "Herramientas de IA",
-                "pages": [
-                  "es/ai-tools/cursor",
-                  "es/ai-tools/claude-code",
-                  "es/ai-tools/windsurf"
+                  "es/integrations/unity",
+                  "es/integrations/unreal"
                 ]
               }
             ]
@@ -142,13 +110,15 @@
               {
                 "group": "Documentación de la API",
                 "pages": [
-                  "es/api-reference/introduction"
+                  "es/api-reference/introduction",
+                  "es/api-reference/uids",
+                  "es/api-reference/authentication"
                 ]
               },
               {
                 "group": "Endpoints",
                 "openapi": {
-                  "source": "api-reference/openapi.yaml"
+                  "source": "es/api-reference/openapi.yaml"
                 }
               }
             ]
