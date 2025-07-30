@@ -33,7 +33,7 @@
         "language": "en",
         "tabs": [
           {
-            "dropdown": "Guides",
+            "tab": "Guides",
             "icon": "book",
             "description": "How to use NPC Builder",
             "pages": [
@@ -72,7 +72,7 @@
             ]
           },
           {
-            "dropdown": "API reference",
+            "tab": "API reference",
             "icon": "code",
             "description": "API documentation and endpoints",
             "pages": [
@@ -94,9 +94,9 @@
       },
       {
         "language": "es",
-        "dropdowns": [
+        "tabs": [
           {
-            "dropdown": "Guías",
+            "tab": "Guías",
             "icon": "book",
             "description": "Cómo usar NPC Builder",
             "pages": [
@@ -135,7 +135,7 @@
             ]
           },
           {
-            "dropdown": "Referencia de API",
+            "tab": "Referencia de API",
             "icon": "code",
             "description": "Documentación de la API y endpoints",
             "pages": [
