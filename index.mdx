@@ -1,32 +1,68 @@
 ---
 title: "Introduction"
-description: "Welcome to the NPC Builder documentation! "
+description: "Welcome to the NPC Builder documentation"
 ---
 
-NPC Builder is a platform for creating AI-powered non-playable characters (NPCs) that bring your games to life with dynamic, context-aware dialogues. Here you will find guides and references to help you integrate NPC Builder into your projects, use our APIs for interactive NPC conversations, and manage your game's context (characters, worlds, etc.) through the NPC Builder system.
+<Info>
+NPC Builder brings <strong>AI-driven, context-aware NPCs</strong> to your games.  
+Use these guides to set up your account, integrate our SDKs, and call the APIs.
+</Info>
+
+<Warning>
+<strong>Active plan required:</strong> API and SDK access require an NPC Builder subscription.  
+<a href="https://npcbuilder.com/plans">View plans & pricing</a>.
+</Warning>
+
+## Get started
 
 <Columns cols={2}>
-  <Card title="Interactions API Guide" icon="message-dots" href="/interactions-api-guide">
-    Learn how to use the NPC chat API (`/interactions` endpoint) to have dynamic conversations with your NPCs. Covers authentication, request/response format, and tips for best results.
+  <Card title="Quickstart" href="/quickstart" icon="rocket" horizontal>
+    Sign up, generate a token, and receive your first NPC reply in minutes.
   </Card>
-  <Card title="Context API Guide" icon="database" href="/context-api-reference">
-    Manage your game world through the Context API. Create and update NPC characters, worlds, regions, and locations programmatically to keep your game state in sync with NPC dialogues.
+  <Card title="Documentation workflow" href="/development" icon="gear" horizontal>
+    Preview and customize this docs site locally.
+  </Card>
+</Columns>
+
+## Game-engine integrations
+
+<Columns cols={2}>
+  <Card title="Unity Plugin" href="/integrations/unity">
+  <img
+    src="/images/unity-light.png"
+    alt="Unity plugin – light background"
+    className="block dark:hidden rounded-lg mb-2"
+  />
+
+  <img
+    src="/images/unity-dark.png"
+    alt="Unity plugin – dark background"
+    className="hidden dark:block rounded-lg mb-2"
+  />
+    Import the package, add credentials, and chat with NPCs using C# events.
+  </Card>
+
+  <Card title="Unreal Engine Plugin" href="/integrations/unreal">
+    <img
+      src="/images/unreal-thumb.png"
+      alt="Unreal plugin thumbnail"
+      style={{ borderRadius: '0.5rem', marginBottom: '0.5rem' }}
+    />
+    Blueprint nodes for asynchronous conversations in Unreal Engine 5.
   </Card>
 </Columns>
 
-<Card title="Game Engine Integrations" icon="gamepad" href="/integrations/">
-  Plugins for popular game engines (Unreal & Unity) to streamline integration. Follow step-by-step guides to install the NPC Builder SDK in Unreal Engine or Unity and start engaging with AI-driven NPCs in your game.
+## API guides
 
-  <Card title="Unreal Engine Plugin" icon="plug" href="/integrations/unreal-engine">
-    Step-by-step setup and usage of the NPC Builder Unreal Engine plugin, with Blueprint integration for sessions and NPC interactions.
+<Columns cols={2}>
+  <Card title="Interactions API" href="/interactions-api-guide" icon="message-dots">
+    Authenticate, send messages to NPCs, and handle events in responses.
   </Card>
-  <Card title="Unity Plugin" icon="plug" href="/integrations/unity">
-    Installation and scripting guide for the NPC Builder Unity plugin. Learn how to configure the plugin and use C# events to interact with NPCs.
-  </Card>
-</Card>
-
-<Columns cols={1}>
-  <Card title="Full API Reference" icon="book" href="/api-reference">
-    Complete OpenAPI specification of all NPC Builder API endpoints. Use this reference to explore all available endpoints, parameters, and schemas not covered in the guides.
+  <Card title="Context API" href="/context-api-reference" icon="database">
+    Programmatically manage Games, Worlds, Regions, Locations, and Characters.
   </Card>
 </Columns>
+
+<Tip>
+Need full endpoint details? Explore the <a href="/api-reference/introduction">OpenAPI reference</a>.
+</Tip>
