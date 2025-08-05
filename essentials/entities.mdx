@@ -4,7 +4,7 @@ description: "World, Region, Location & Character fields you can edit via the Co
 ---
 
 <Info>
-  NPC Builder’s **Context API** is organized in four layers.\
+  NPC Builder's **Context API** is organized in four layers.\
   Use this reference to see every entity type and which fields you can update programmatically.
 </Info>
 
@@ -15,7 +15,7 @@ description: "World, Region, Location & Character fields you can edit via the Co
     Highest in-game realm or server—houses regions and locations.
   </Card>
   <Card title="Region" icon="map">
-    Optional zone or chapter inside a world (e.g. “Northern Kingdom”).
+    Optional zone or chapter inside a world (e.g. "Northern Kingdom").
   </Card>
   <Card title="Location" icon="map-pin">
     Precise place such as towns, dungeons, or rooms.
@@ -32,202 +32,42 @@ description: "World, Region, Location & Character fields you can edit via the Co
 <Tabs>
   <Tab title="World">
     <ul>
-    <li>
-    <code>
-    name</code>
-
-     – max 25 chars</li>
-
-    
-    <li>
-    <code>
-    lore</code>
-
-     – back-story, max 1400 chars</li>
-
-    
-    <li>
-    <code>
-    creatures</code>
-
-     – free-text list, max 75 chars</li>
-
-    
-    <li>
-    <code>
-    similarWorlds</code>
-
-     – string array of related worlds</li>
-
+    <li><code>name</code> – max 25 chars</li>
+    <li><code>lore</code> – back-story, max 1400 chars</li>
+    <li><code>creatures</code> – free-text list, max 75 chars</li>
+    <li><code>similarWorlds</code> – string array of related worlds</li>
     </ul>
   </Tab>
   <Tab title="Region">
     <ul>
-    <li>
-    <code>
-    name</code>
-
-     – max 25 chars</li>
-
-    
-    <li>
-    <code>
-    lore</code>
-
-     – max 1400 chars</li>
-
-    
-    <li>
-    <code>
-    weather</code>
-
-     – short weather descriptor, max 25 chars</li>
-
-    
-    <li>
-    <code>
-    culture</code>
-
-     – customs / population style, max 125 chars</li>
-
-    
-    <li>
-    <code>
-    politicalStability</code>
-
-     – enum:\
-    
-    <code>
-    none</code>
-
-    , <code>
-    highlyStable</code>
-
-    , <code>
-    stable</code>
-
-    , <code>
-    moderatelyStable</code>
-
-    , <code>
-    unstable</code>
-
-    , <code>
-    highlyUnstable</code>
-
-    , <code>
-    anarchy</code>
-
-    </li>
-
+    <li><code>name</code> – max 25 chars</li>
+    <li><code>lore</code> – max 1400 chars</li>
+    <li><code>weather</code> – short weather descriptor, max 25 chars</li>
+    <li><code>culture</code> – customs / population style, max 125 chars</li>
+    <li><code>politicalStability</code> – enum:\
+    <code>none</code>, <code>highlyStable</code>, <code>stable</code>, <code>moderatelyStable</code>, <code>unstable</code>, <code>highlyUnstable</code>, <code>anarchy</code></li>
     </ul>
   </Tab>
   <Tab title="Location">
     <ul>
-    <li>
-    <code>
-    name</code>
-
-     – max 25 chars</li>
-
-    
-    <li>
-    <code>
-    lore</code>
-
-     – max 1400 chars</li>
-
-    
-    <li>
-    <code>
-    role</code>
-
-     – purpose of the place, max 25 chars (e.g. “Trade hub”)</li>
-
+    <li><code>name</code> – max 25 chars</li>
+    <li><code>lore</code> – max 1400 chars</li>
+    <li><code>role</code> – purpose of the place, max 25 chars (e.g. "Trade hub")</li>
     </ul>
   </Tab>
   <Tab title="Character">
     <ul>
-    <li>
-    <code>
-    name</code>
-
-     – max 25 chars</li>
-
-    
-    <li>
-    <code>
-    description</code>
-
-     – bio, max 1400 chars</li>
-
-    
-    <li>
-    <code>
-    age</code>
-
-     – enum: infant • child • teenager • youngAdult • adult • middleAged • elderly
-
-    </li>
-
-    
-    <li>
-    <code>
-    gender</code>
-
-     – “Male”, “Female”, or free text</li>
-
-    
-    <li>
-    <code>
-    role</code>
-
-     – narrative role enum (e.g. <code>
-    protagonist</code>
-
-    , <code>
-    questGiver</code>
-
-    , …)</li>
-
-    
-    <li>
-    <code>
-    tone</code>
-
-     – dialogue tone enum: formal • casual • sarcastic • mysterious • emotive</li>
-
-    
-    <li>
-    <code>
-    traits</code>
-
-     – string array (avoid opposite trait pairs: brave/coward, kind/cruel, …)</li>
-
-    
-    <li>
-    <code>
-    items</code>
-
-     – array of\
-    
-    <code>
-     itemName, unit, value </code>
-
-     (each max 25 chars)</li>
-
-    
-    <li>
-    <code>
-    quests</code>
-
-     – array of\
-    
-    <code>
-     description, objective, reward </code>
-
-     (each max 125 chars)</li>
-
+    <li><code>name</code> – max 25 chars</li>
+    <li><code>description</code> – bio, max 1400 chars</li>
+    <li><code>age</code> – enum: infant • child • teenager • youngAdult • adult • middleAged • elderly</li>
+    <li><code>gender</code> – "Male", "Female", or free text</li>
+    <li><code>role</code> – narrative role enum (e.g. <code>protagonist</code>, <code>questGiver</code>, …)</li>
+    <li><code>tone</code> – dialogue tone enum: formal • casual • sarcastic • mysterious • emotive</li>
+    <li><code>traits</code> – string array (avoid opposite trait pairs: brave/coward, kind/cruel, …)</li>
+    <li><code>items</code> – array of\
+    <code>itemName, unit, value</code> (each max 25 chars)</li>
+    <li><code>quests</code> – array of\
+    <code>description, objective, reward</code> (each max 125 chars)</li>
     </ul>
   </Tab>
 </Tabs>
@@ -236,7 +76,5 @@ description: "World, Region, Location & Character fields you can edit via the Co
 
 <Tip>
   For request schemas, example payloads, and enum lists, open the <a href="/api-reference/introduction">
-  OpenAPI explorer</a>
-
-  .
+  OpenAPI explorer</a>.
 </Tip>
