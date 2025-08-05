@@ -1,5 +1,86 @@
 ---
-title: "Unreal Engine - Plugin"
-description: "Welcome to the NPC Builder Plugin for Unreal Engine!"
+title: "Unreal Engine Plugin"
+description: "Blueprint-based AI NPC integration for Unreal Engine"
 ---
 
+<Info>
+The NPC Builder Unreal plugin adds asynchronous Blueprint nodes so you can chat with AI‑powered NPCs without leaving the editor.  
+It supports Unreal Engine 5.0 and higher.
+</Info>
+
+## Prerequisites
+
+- Unreal Engine 5.0+  
+- NPC Builder account with an **active plan**  
+- Client ID / Secret (or Bearer token) generated in **Developers → API Keys**
+
+## 1 · Install the plugin
+
+<Steps>
+  <Step title="Download">
+    Get <code>NPCBuilder.unrealplugin</code> from the Unreal Marketplace (or company download link).
+  </Step>
+  <Step title="Enable in project">
+    Copy the plugin into your project’s <code>Plugins/</code> folder &nbsp;→&nbsp; restart the editor.  
+    Then open **Edit → Plugins** and ensure <em>NPC Builder SDK</em> is ticked.
+  </Step>
+</Steps>
+
+## 2 · Configure credentials
+
+Add credentials to <code>Config/DefaultGame.ini</code>:
+
+```ini
+[/Script/NPCBuilderSDK.NPCBuilderSDKSettings]
+ClientId=YOUR_CLIENT_ID
+ClientSecret=YOUR_CLIENT_SECRET
+GameId=YOUR_GAME_ID
+BearerToken=YOUR_BEARER_TOKEN ; optional
+```
+
+<Callout type="warning">
+If both <code>ClientSecret</code> and <code>BearerToken</code> are present, the plugin prioritises <code>ClientSecret</code>.
+</Callout>
+
+## 3 · Blueprint workflow
+
+<Steps>
+  <Step title="Create Session">
+    Use the <strong>Create Session</strong> node to obtain <code>Session ID</code>.  
+    Provide <code>ClientId</code>/<code>ClientSecret</code> pins only if not set in <code>DefaultGame.ini</code>.
+  </Step>
+  <Step title="Update Character">
+    Pass the <code>Character ID</code> (from the dashboard) and change optional fields (model, tone, events).
+  </Step>
+  <Step title="NPC Interaction">
+    Send player text; the node returns <code>response</code> plus <code>character_events</code>.  
+    Use the response pin to update UI and parse events for gameplay.
+  </Step>
+  <Step title="Reset Conversation (optional)">
+    Clear memory when the player leaves or you need a fresh start.
+  </Step>
+</Steps>
+
+## 4 · Handling events
+
+Events defined on the platform appear in <code>character_events</code> or <code>user_events</code> arrays.
+
+```blueprint
+Event OnNPCEvent
+ ├── Branch  (EventName == "dance")
+ └── Play Montage (NPCA_DanceMontage)
+```
+
+Each event can include a referenced item. Use the plugin’s delegate to fetch the mapped <code>GameObject</code>:
+
+```c++
+npcInteractions->OnGetItemObject.AddDynamic(this, &AMyActor::HandleItem);
+```
+
+<Tip>
+All plugin Blueprint nodes are **asynchronous**—network calls never block the game thread.
+</Tip>
+
+<Note>
+Need a REST example instead of Blueprints? See <a href="/interactions-api-guide">Interactions API guide</a>.
+</Note>
