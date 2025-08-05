@@ -1,58 +1,123 @@
 ---
 title: "Quickstart"
-description: "Set up NPC Builder and run your first conversation"
+description: "Create a project, add context, and chat with your first NPC"
 ---
 
 <Info>
-<strong>Prerequisites</strong><br/>
-• NPC Builder account • Game created in dashboard
+  Follow these steps to go from a brand-new account to your first NPC conversation.
 </Info>
 
-<Steps>
-  <Step title="Log in & create a game">
-    Sign in at <a href="https://app.npcbuilder.com">app.npcbuilder.com</a> and create a new game project.<br/>
-    Copy the shown <code>GAME_ID</code>.
-  </Step>
+<Warning>
+  Active plan required:
 
-  <Step title="Generate API token">
-    In <em>Developers → API Tokens</em> click <strong>Generate Bearer Token</strong>.<br/>
-    Store the JWT safely.  
+   API & SDK usage need an NPC Builder subscription.
+  <a href="https://npcbuilder.com/plans">
+  View plans & pricing
+  </a>
+  .
+</Warning>
+
+## In-app setup
+
+<Steps>
+  <Step title="Create a game">
+    Sign in at <a href="https://app.npcbuilder.com">
+    app.npcbuilder.com</a>
+
+     and click Create Game
+
+    .\
+    Copy the generated <code>
+    GAME_ID</code>
+
+    .
+  </Step>
+  <Step title="Add a world">
+    Inside the game, click Add World
+
+    ; fill name and lore.\
+    Copy the <code>
+    WORLD_ID</code>
+
+    .
+  </Step>
+  <Step title="Add region & location">
+    Open your world → Add Region
+
+     (e.g. “Northern Kingdom”) →\
+    inside that region, Add Location
+
+     (e.g. “Capital City”).
+  </Step>
+  <Step title="Create a character">
+    In the location, click Add Character
+
+     → fill name, description, role, traits, etc.\
+    Save; note the <code>
+    character_name</code>
+
+     to use in the API.
+  </Step>
+  <Step title="Chat in dashboard">
+    On the character page, open the Chat
+
+     tab and send a test message—confirm the NPC responds.
+  </Step>
+</Steps>
+
+## Generate credentials
+
+<Steps>
+  <Step title="Bearer token (quick)">
+    Go to Developers → API Tokens
+
+     → Generate Bearer Token
+
+    .\
+    Use in header:
+
     ```http
     Authorization: Bearer YOUR_TOKEN
     ```
   </Step>
+  <Step title="API keys (production)">
+    Still in Developers, create an API Key
 
-  <Step title="Copy World ID">
-    Expand the context tree and copy your <code>WORLD_ID</code>.  
-    (Add more worlds any time.)
-  </Step>
+     pair.\
+    Use in headers:
 
-  <Step title="POST /interactions">
-    ```bash
-    curl -X POST https://app.npcbuilder.com/api/interactions \\
-      -H "Authorization: Bearer YOUR_TOKEN" \\
-      -H "Content-Type: application/json" \\
-      -d '{
-            "character_name": "Guardian",
-            "game_id": "GAME_ID",
-            "world_id": "WORLD_ID",
-            "messages": [
-              { "role": "user", "content": "Hello!" }
-            ]
-          }'
-    ```
-  </Step>
-
-  <Step title="Read reply">
     ```json
     {
-      "response": "Greetings, traveler!",
-      "user_events": [],
-      "character_events": []
+      "clientId": "API_KEY_ID",
+      "clientSecret": "API_KEY_SECRET"
     }
     ```
-    Show <code>response</code> to the player; handle events as gameplay hooks.
   </Step>
 </Steps>
 
-<Note>Unity / Unreal plugins wrap these calls for you—see integration guides.</Note>
+## Call the Interactions API
+
+```bash
+curl -X POST https://app.npcbuilder.com/api/interactions \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "character_name": "Guardian NPC",
+    "game_id": "GAME_ID",
+    "world_id": "WORLD_ID",
+    "messages": [
+      { "role": "user", "content": "Hello!" }
+    ]
+  }'
+```
+
+### Expected JSON
+
+```json
+{
+  "response": "Greetings, traveler!",
+  "user_events": [],
+  "character_events": []
+}
+```
+<Callout type="tip"> Include previous user + NPC messages in <code>messages[]</code> on each call to keep context. </Callout> <Note> Unity and Unreal plugins wrap these calls—see <a href="/integrations/unity">Unity</a> or <a href="/integrations/unreal">Unreal</a> guides. </Note>
