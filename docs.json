@@ -42,7 +42,7 @@
                 "pages": [
                   "index",
                   "quickstart",
-                  "development"
+                  "essentials/entities"
                 ]
               },
               {
@@ -90,7 +90,7 @@
                 "pages": [
                   "es/index",
                   "es/quickstart",
-                  "es/development"
+                  "es/essentials/entidades"
                 ]
               },
               {
