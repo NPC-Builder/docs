@@ -12,19 +12,14 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://npcbuilder.com/docs",
+          "anchor": "Website",
+          "href": "https://npcbuilder.com/",
           "icon": "book-open-cover"
         },
         {
           "anchor": "Community",
           "href": "https://discord.gg/9D6Xdj2MPU",
           "icon": "discord"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://npcbuilder.com/news",
-          "icon": "newspaper"
         }
       ]
     },
