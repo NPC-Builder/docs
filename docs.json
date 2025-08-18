@@ -89,7 +89,7 @@
                 ]
               },
               {
-                "group": "Personalización",
+                "group": "Integraciones",
                 "pages": [
                   "es/integrations/unity",
                   "es/integrations/unreal"
