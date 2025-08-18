@@ -1,32 +1,74 @@
 ---
 title: "Introducción"
-description: "¡Bienvenido/a a la documentación de NPC Builder!"
+description: "Bienvenido a la documentación de NPC Builder"
 ---
 
-NPC Builder es una plataforma para crear personajes no jugables (NPC) impulsados por IA que dan vida a tus juegos con diálogos dinámicos y conscientes del contexto. Aquí encontrarás guías y referencias para ayudarte a integrar NPC Builder en tus proyectos, usar nuestras API para conversaciones interactivas con NPCs y gestionar el contexto de tu juego (personajes, mundos, etc.) a través del sistema de NPC Builder.
+<Info>
+NPC Builder lleva <strong>NPCs impulsados por IA y conscientes del contexto</strong> a tus juegos.  
+Utiliza estas guías para configurar tu cuenta, integrar nuestros SDKs y llamar a las APIs.
+</Info>
+
+<Warning>
+<strong>Se requiere un plan activo:</strong> El acceso a la API y al SDK requiere una suscripción a NPC Builder.  
+<a href="https://npcbuilder.com/plans">Ver planes y precios</a>.
+</Warning>
+
+## Comienza ahora
 
 <Columns cols={2}>
-  <Card title="Guía de API de interacciones" icon="message-dots" href="es/interactions-api-guide">
-    Aprende a usar la API de chat de NPC (endpoint `/interactions`) para mantener conversaciones dinámicas con tus NPCs. Cubre autenticación, formato de solicitud/respuesta y consejos para obtener los mejores resultados.
+  <Card title="Inicio rápido" href="/quickstart" icon="rocket" horizontal>
+    Regístrate, genera un token y recibe la primera respuesta de un NPC en minutos.
   </Card>
-  <Card title="Guía de API de contexto" icon="database" href="es/context-api-reference">
-    Gestiona el mundo de tu juego a través de la Context API. Crea y actualiza personajes NPC, mundos, regiones y ubicaciones de forma programática para mantener el estado del juego sincronizado con los diálogos de los NPCs.
+  <Card title="Referencia de Entidades" href="/essentials/entities" icon="gear" horizontal>
+    Aprende sobre todas las entidades existentes en NPC Builder y cómo utilizarlas.
+  </Card>
+</Columns>
+
+## Integraciones con motores de juego
+
+<Columns cols={2}>
+  <Card title="Plugin para Unity" href="/integrations/unity">
+  <img
+    src="/images/unity-light.svg"
+    alt="Plugin de Unity – fondo claro"
+    className="block dark:hidden w-full h-40 rounded-lg mb-2"
+  />
+
+  <img
+    src="/images/unity-dark.svg"
+    alt="Plugin de Unity – fondo oscuro"
+    className="hidden dark:block w-full h-40 rounded-lg mb-2"
+  />
+    Importa el paquete, añade tus credenciales y chatea con NPCs usando eventos en C#.
+  </Card>
+
+  <Card title="Plugin para Unreal Engine" href="/integrations/unreal">
+  <img
+    src="/images/unreal-light.svg"
+    alt="Plugin de Unreal – fondo claro"
+    className="block dark:hidden w-full h-40 rounded-lg mb-2"
+  />
+
+  <img
+    src="/images/unreal-dark.svg"
+    alt="Plugin de Unreal – fondo oscuro"
+    className="hidden dark:block w-full h-40 rounded-lg mb-2"
+  />
+    Nodos Blueprint para conversaciones asíncronas en Unreal Engine 5.
   </Card>
 </Columns>
 
-<Card title="Integraciones con motores gráficos" icon="gamepad" href="es/integrations/">
-  Plugins para motores de juego populares (Unreal y Unity) que simplifican la integración. Sigue las guías paso a paso para instalar el SDK de NPC Builder en Unreal Engine o Unity y empezar a interactuar con NPCs impulsados por IA en tu juego.
+## Guías de API
 
-  <Card title="Plugin de Unreal Engine" icon="plug" href="es/integrations/unreal-engine">
-    Configuración y uso paso a paso del plugin de NPC Builder para Unreal Engine, con integración mediante Blueprints para sesiones e interacciones con NPCs.
+<Columns cols={2}>
+  <Card title="API de Interacciones" href="/interactions-api-guide" icon="message-dots">
+    Autentica, envía mensajes a los NPCs y gestiona eventos en las respuestas.
   </Card>
-  <Card title="Plugin de Unity" icon="plug" href="es/integrations/unity">
-    Guía de instalación y scripting del plugin de NPC Builder para Unity. Aprende a configurar el plugin y utilizar eventos de C# para interactuar con NPCs.
-  </Card>
-</Card>
-
-<Columns cols={1}>
-  <Card title="Referencia de API completa" icon="book" href="es/api-reference">
-    Especificación completa de OpenAPI de todos los endpoints de la API de NPC Builder. Usa esta referencia para explorar todos los endpoints, parámetros y esquemas no cubiertos en las guías.
+  <Card title="API de Contexto" href="/context-api-reference" icon="database">
+    Gestiona programáticamente Juegos, Mundos, Regiones, Localizaciones y Personajes.
   </Card>
 </Columns>
+
+<Tip>
+¿Necesitas todos los detalles de los endpoints? Explora la <a href="/api-reference/introduction">referencia OpenAPI</a>.
+</Tip>
