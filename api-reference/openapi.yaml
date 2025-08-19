@@ -511,20 +511,13 @@ paths:
           schema:
             type: string
             example: "world456"
-        - name: region_id
-          in: query
-          required: false
-          description: The unique identifier for the region.
+        - name: character_id
+          in: path
+          required: true
+          description: The unique identifier for the character.
           schema:
             type: string
-            example: "region789"
-        - name: location_id
-          in: query
-          required: false
-          description: The unique identifier for the location.
-          schema:
-            type: string
-            example: "location789"
+            example: "character789"
         - name: session_id
           in: query
           description: (Optional) The player's session ID.
