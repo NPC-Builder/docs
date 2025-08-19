@@ -261,7 +261,7 @@ paths:
                           itemName:
                             type: string
                             description: The name of the trade item.
-                            example: "Sword"
+                            example: "sword"
                           description:
                             type: string
                             description: A detailed description of the item.
@@ -440,7 +440,7 @@ paths:
                       description: "A brave warrior with a mysterious past."
                       gender: "Male"
                       items:
-                        - itemName: "Sword"
+                        - itemName: "sword"
                           unit: "Piece"
                           value: 100
                       name: "Aragorn"
@@ -588,7 +588,7 @@ paths:
                           itemName:
                             type: string
                             description: The name of the trade item.
-                            example: "Sword"
+                            example: "sword"
                           description:
                             type: string
                             description: A detailed description of the item.
@@ -764,7 +764,7 @@ paths:
                       description: "A brave warrior with a mysterious past."
                       gender: "Male"
                       items:
-                        - itemName: "Sword"
+                        - itemName: "sword"
                           unit: "Piece"
                           value: 100
                       name: "Aragorn"
