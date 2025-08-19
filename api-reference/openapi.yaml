@@ -152,7 +152,7 @@ paths:
               example: "Error creating interaction"
       security:
         - npcbuilder_auth: []
-  /context/characters/{game_id}/{world_id}/{character_id}:
+  /context/characters/{game_id}/{world_id}:
     post:
       summary: Create a new character
       tags:
@@ -271,9 +271,9 @@ paths:
                             description: The unit in which the item is measured.
                             example: "Piece"
                           value:
-                            type: string
+                            type: number
                             description: The value or cost of the item.
-                            example: "100"
+                            example: 100
                         required:
                           - itemName
                           - unit
@@ -442,7 +442,7 @@ paths:
                       items:
                         - itemName: "Sword"
                           unit: "Piece"
-                          value: "100"
+                          value: 100
                       name: "Aragorn"
                       quests:
                         - description: "Retrieve the lost artifact."
@@ -481,6 +481,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - npcbuilder_auth: []
+  /context/characters/{game_id}/{world_id}/{character_id}:
     patch:
       summary: Update character details
       tags:
@@ -597,9 +598,9 @@ paths:
                             description: The measurement unit.
                             example: "Piece"
                           value:
-                            type: string
+                            type: number
                             description: The cost or value of the item.
-                            example: "100"
+                            example: 100
                         required:
                           - itemName
                           - unit
@@ -765,7 +766,7 @@ paths:
                       items:
                         - itemName: "Sword"
                           unit: "Piece"
-                          value: "100"
+                          value: 100
                       name: "Aragorn"
                       quests:
                         - description: "Retrieve the lost artifact."
@@ -865,7 +866,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - npcbuilder_auth: []
-  /context/world/{game_id}:
+  /context/world/{game_id}/{world_id}:
     post:
       summary: Create a new world
       tags:
@@ -881,6 +882,13 @@ paths:
           schema:
             type: string
             example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: The unique identifier for the world.
+          schema:
+            type: string
+            example: "world456"
         - name: session_id
           in: query
           description: (Optional) The player's session ID.
@@ -968,7 +976,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - npcbuilder_auth: []
-  /context/world/{game_id}/{world_id}:
     patch:
       summary: Update world details
       tags:
