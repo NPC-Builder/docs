@@ -49,8 +49,8 @@ description: "Create a project, add context, and chat with your first NPC"
     In the location, click Add Character
 
      → fill name, description, role, traits, etc.\
-    Save; note the <code>
-    character_name</code>
+    Save; note the <code>character_id</code>
+    ![quickstart-5](/media/quickstart-5.png)
 
      to use in the API.
   </Step>
@@ -65,11 +65,9 @@ description: "Create a project, add context, and chat with your first NPC"
 
 <Steps>
   <Step title="Bearer token (quick)">
-    Go to Developers → API Tokens
+    Go to the developers section under graphics engine integration and generate Bearer Token
+    ![quickstart-auth-1](/media/quickstart-auth-1.png)
 
-     → Generate Bearer Token
-
-    .\
     Use in header:
 
     ```http
@@ -77,10 +75,11 @@ description: "Create a project, add context, and chat with your first NPC"
     ```
   </Step>
   <Step title="API keys (production)">
-    Still in Developers, create an API Key
-
-     pair.\
-    Use in headers:
+    Still in Developers, you can create an API Key.
+    ![quickstart-auth-2](/media/quickstart-auth-2.png)
+    <Warning>Generated API Key secret must be stored securely. If you lose it, you must delete it and generate a new one. We can't recover API Key secrets </Warning>
+    Use in headers with combination of clientId and clientSecret (the generated api key):
+    ![quickstart-auth-3](/media/quickstart-auth-3.png)
 
     ```json
     {
@@ -98,7 +97,7 @@ curl -X POST https://app.npcbuilder.com/api/interactions \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "character_name": "Guardian NPC",
+    "character_id": "CHARACTER_ID",
     "game_id": "GAME_ID",
     "world_id": "WORLD_ID",
     "messages": [
