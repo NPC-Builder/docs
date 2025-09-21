@@ -7,54 +7,146 @@ description: "Detailed guide on how to create and configure events and items glo
   NPC Builder's **Events & Items system** is a cornerstone of in-game interactions. These entities allow you to script dynamic NPC behaviors and customize gameplay responses. Events serve as triggers to drive actions, while items represent objects or tokens used in these actions. Whether reused across your game or set uniquely for specific characters, both events and items are essential to building an immersive narrative and interactive environment.
 </Info>
 
-## Creating and Configuring Events & Items
+## Create & Configure: Quick workflow
 
-You can add events and items in two distinct ways:
-- Global Creation:
-  - Go to the Settings section on the platform.
-  - Add events and items to collections, making them available for reuse across multiple characters and scenarios.
-- On Character Creation:
-  - Open the character's properties interface.
-  - Click “New Event” or “New Item” to create a custom event or item for that character.
-  - Alternatively, use “Link from Repo” to attach an already defined global event or item.
+<Steps>
+  <Step title="Decide scope: Global vs Character">
+    Choose whether the event/item should be reused across many characters (Global) or tailored to a single NPC (Character-level).
+    Global → reuse, version centrally, link from repo.\
+    Character → bespoke behavior, local overrides.
+    ![scope-placeholder](/media/events-items-scope.png)
+  </Step>
 
-Following these steps ensures that your game’s interactions are both flexible and consistent.
+  <Step title="Global creation (recommended for reuse)">
+    Open Settings → Collections → Events or Items → New.
+    Fill Name/UID, Description, Type, and Save to collection.
+    Use descriptive UIDs to make linking easier (e.g. <code>quest-token-gold</code>).
+    ![global-create](/media/events-global-create.png)
+  </Step>
 
-## Detailed Event Types
+  <Step title="Character-level creation">
+    Open a Character → Properties → Events & Items panel → Click “New Event” or “New Item”.
+    Fill required fields for the character-specific behavior. Use this when the event/item is unique to that NPC.
+    ![character-create](/media/events-character-create.png)
+  </Step>
 
-Events are designed to control NPC behaviors and overall game dynamics:
-- Action Events: Trigger standalone actions, such as an NPC initiating a conversation or following the player. They operate independently and serve as direct behavioral triggers.
-- Item Events: Connect specific items with the triggered event. This type of event is ideal when the action involves giving, using, or interacting with an item (e.g., rewarding a token).
+  <Step title="Link global elements to a character">
+    In the character’s Events & Items panel choose “Link from Repo”, then select the global event or item.
+    Linked items remain managed in Settings; edits there propagate to characters that reference them.
+    ![link-repo](/media/events-link-repo.png)
+  </Step>
+</Steps>
 
-### Event Definition
+---
 
-An event entity is defined by:
-- Name/UID: A unique identifier ensuring the event can be referenced accurately.
-- Description: A comprehensive explanation detailing the event’s purpose, conditions, and outcomes.
-- Type:
-  - Action: Specifies a standalone behavior not dependent on any item.
-  - Item: Links the event to a particular item, integrating object-specific logic.
+## What is an Event? (entity & purpose)
 
-This structure aids developers and game designers in creating consistent, reusable events that blend seamlessly into the core game mechanics.
+<Info>
+  An Event is an entity that represents a triggerable interaction or behavior in the game world. Use events to encode what should happen and when—either as standalone behaviors or as item-driven actions.
+</Info>
 
-## Detailed Item Types
+<Steps>
+  <Step title="When to use Events">
+    Use events to:
+    - Trigger NPC behaviors (dialogue, follow, flee, give item).
+    - React to player actions (pick up, talk, trade).
+    - Drive quest steps and gameflow.
+  </Step>
 
-Items are integral elements that interact with events to drive gameplay:
-- Trade: Items designed for economic or bartering systems, facilitating purchases and exchanges.
-- Action: Items that carry a distinct purpose, contributing directly to narrative progression or gameplay objectives.
+  <Step title="Benefits of modelling Events explicitly">
+    - Reusability: define once and link across characters.
+    - Clarity: central place to document intent and outcomes.
+    - Composition: combine events with items and quests to build complex interactions.
+  </Step>
+</Steps>
 
-### Item Definition
+### Event Types
 
-An item entity includes:
-- Name/UID: A unique identifier that distinguishes it from other items.
-- Description: A detailed account of the item’s role, appearance, and functionality within your game.
-- Type: Indicates whether the item is meant for trade scenarios or specific actionable purposes.
+<Steps>
+  <Step title="Action Event">
+    Action Events are item‑agnostic behaviors (e.g., "NPC follows player", "NPC starts conversation", "NPC flees"). They describe a direct behavioral change and usually contain the action name, triggering conditions, and optional parameters (duration, range).
+    ![action-event](/media/events-action.png)
+  </Step>
 
-This explanation ensures that items are clearly understood as dynamic components that support the overall interactivity and narrative of your game.
+  <Step title="Item Event">
+    Item Events are associated with a specific item (e.g., "Give token to player", "Consume key to open door"). They define the relationship between an action and an item, including how the item is granted, removed, or checked.
+    ![item-event](/media/events-item.png)
+  </Step>
+</Steps>
+
+### Event Definition (fields to fill)
+
+<Steps>
+  <Step title="Name / UID">
+    Unique identifier used for linking and API calls. Use short, descriptive slugs (e.g. <code>give-quest-token</code>).
+  </Step>
+  <Step title="Description">
+    Human-friendly explanation: purpose, when it runs, and expected outcome.
+  </Step>
+  <Step title="Type & Parameters">
+    Select Action or Item. Provide any parameters (conditions, item UID, quantity, timing).
+  </Step>
+</Steps>
+
+<Callout type="tip">
+  For events that alter game state (give/remove items, complete quests), prefer global definitions to ensure consistent behavior across NPCs.
+</Callout>
+
+---
+
+## What is an Item? (entity & purpose)
+
+<Info>
+  An Item is a definable object used in gameplay and events: currency, quest tokens, keys, tools, or any tangible entity the game tracks. Items can be used for trade, progression, or story beats.
+</Info>
+
+<Steps>
+  <Step title="When to create Items">
+    - Use Trade items for shops, barter, or economy systems.\
+    - Use Action items for quest tools, keys, or story-specific objects.
+  </Step>
+
+  <Step title="Why model Items explicitly">
+    - Trackable state: inventory, ownership, counts.
+    - Interoperability: referenced by events, quests, and UI.
+    - Clear semantics: description and type ensure consistent usage.
+  </Step>
+</Steps>
+
+### Item Types
+
+<Steps>
+  <Step title="Trade">
+    Items intended for buying/selling or barter (e.g., "gold coin", "merchant voucher"). Include value, unit, and any trade rules.
+    ![trade-item](/media/items-trade.png)
+  </Step>
+
+  <Step title="Action">
+    Items with a gameplay role (e.g., "skeleton key", "ancient map", "quest token"). Typically consumed or checked by Item Events.
+    ![action-item](/media/items-action.png)
+  </Step>
+</Steps>
+
+### Item Definition (fields to fill)
+
+<Steps>
+  <Step title="Name / UID">
+    Unique identifier used by events and inventory systems.
+  </Step>
+  <Step title="Description">
+    Explain role, appearance, and any rules (can be stacked, consumable, tradable).
+  </Step>
+  <Step title="Type & Metadata">
+    Choose Trade or Action; add metadata such as unit, value, or tags used by game systems.
+  </Step>
+</Steps>
+
+<Callout type="tip">
+  Keep item UIDs stable and descriptive. If you expect many variants, use tags or metadata instead of creating many near-duplicate items.
+</Callout>
 
 ---
 
 <Tip>
-  For request schemas, example payloads, and enum lists, open the <a href="/api-reference/introduction">
-  OpenAPI explorer</a>.
+  For request schemas, example payloads, and enum lists, open the <a href="/api-reference/introduction">OpenAPI explorer</a>.
 </Tip>
