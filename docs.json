@@ -37,7 +37,8 @@
                 "pages": [
                   "index",
                   "quickstart",
-                  "essentials/entities"
+                  "essentials/entities",
+                  "essentials/events-and-items"
                 ]
               },
               {

@@ -55,7 +55,8 @@ Keep credentials out of public repos. Use Unity’s **Secrets Manager** or CI va
 ## 3 · Attach the component
 
 Drag your NPC prefab into the scene and add **NPCBuilderInteractions** via the Inspector.  
-Fill <code>Game ID</code>, <code>World ID</code>, and <code>character_name</code>—all visible in the dashboard context tree.
+Fill <code>Game ID</code>, <code>World ID</code>, and <code>character_id</code>—all visible in the dashboard context tree.
+![unity-2](/integrations/media/unity-2.png)
 
 ## 4 · Minimal chat script
 
@@ -105,8 +106,8 @@ npc.getGameObjectAssociatedToEvent += go =>
 };
 ```
 
-| Event Type | Purpose | Example |
-|------------|---------|---------|
+| Event Type | Purpose    | Example.   |
+|------------|------------|------------|
 | Action     | No item; pure verb | <code>wave</code>, <code>bow</code> |
 | Item       | Includes an item   | <code>give_sword</code>, <code>trade_potion</code> |
 

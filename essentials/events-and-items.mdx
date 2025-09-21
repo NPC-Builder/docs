@@ -1,0 +1,60 @@
+---
+title: "Events & Items Reference"
+description: "Detailed guide on how to create and configure events and items globally and in character, including their purpose and usage."
+---
+
+<Info>
+  NPC Builder's **Events & Items system** is a cornerstone of in-game interactions. These entities allow you to script dynamic NPC behaviors and customize gameplay responses. Events serve as triggers to drive actions, while items represent objects or tokens used in these actions. Whether reused across your game or set uniquely for specific characters, both events and items are essential to building an immersive narrative and interactive environment.
+</Info>
+
+## Creating and Configuring Events & Items
+
+You can add events and items in two distinct ways:
+- Global Creation:
+  - Go to the Settings section on the platform.
+  - Add events and items to collections, making them available for reuse across multiple characters and scenarios.
+- On Character Creation:
+  - Open the character's properties interface.
+  - Click “New Event” or “New Item” to create a custom event or item for that character.
+  - Alternatively, use “Link from Repo” to attach an already defined global event or item.
+
+Following these steps ensures that your game’s interactions are both flexible and consistent.
+
+## Detailed Event Types
+
+Events are designed to control NPC behaviors and overall game dynamics:
+- Action Events: Trigger standalone actions, such as an NPC initiating a conversation or following the player. They operate independently and serve as direct behavioral triggers.
+- Item Events: Connect specific items with the triggered event. This type of event is ideal when the action involves giving, using, or interacting with an item (e.g., rewarding a token).
+
+### Event Definition
+
+An event entity is defined by:
+- Name/UID: A unique identifier ensuring the event can be referenced accurately.
+- Description: A comprehensive explanation detailing the event’s purpose, conditions, and outcomes.
+- Type:
+  - Action: Specifies a standalone behavior not dependent on any item.
+  - Item: Links the event to a particular item, integrating object-specific logic.
+
+This structure aids developers and game designers in creating consistent, reusable events that blend seamlessly into the core game mechanics.
+
+## Detailed Item Types
+
+Items are integral elements that interact with events to drive gameplay:
+- Trade: Items designed for economic or bartering systems, facilitating purchases and exchanges.
+- Action: Items that carry a distinct purpose, contributing directly to narrative progression or gameplay objectives.
+
+### Item Definition
+
+An item entity includes:
+- Name/UID: A unique identifier that distinguishes it from other items.
+- Description: A detailed account of the item’s role, appearance, and functionality within your game.
+- Type: Indicates whether the item is meant for trade scenarios or specific actionable purposes.
+
+This explanation ensures that items are clearly understood as dynamic components that support the overall interactivity and narrative of your game.
+
+---
+
+<Tip>
+  For request schemas, example payloads, and enum lists, open the <a href="/api-reference/introduction">
+  OpenAPI explorer</a>.
+</Tip>
