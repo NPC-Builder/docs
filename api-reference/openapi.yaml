@@ -232,14 +232,33 @@ paths:
                     - premium
                   example: "standard"
                 filters:
-                  type: boolean
+                  type: object
                   description: >
-                    A flag indicating whether to apply filters to the character's responses.
-                    Filters can be used to restrict certain types of content or language.
-                  enum:
-                    - true
-                    - false
-                  example: true
+                    Structured content filters applied to the character's responses.
+                    Toggle the individual categories to restrict what the character can say.
+                  properties:
+                    active:
+                      type: boolean
+                      description: Enables or disables all filters for the character.
+                    violence:
+                      type: boolean
+                      description: Reinforces violent or gory content in character responses.
+                    sexual:
+                      type: boolean
+                      description: Reinforces sexual or suggestive content in character responses.
+                    drugs:
+                      type: boolean
+                      description: Reinforces references to drug use or paraphernalia in character responses.
+                  required:
+                    - active
+                    - violence
+                    - sexual
+                    - drugs
+                  example:
+                    active: true
+                    violence: false
+                    sexual: false
+                    drugs: true
                 items:
                   type: array
                   description: >
@@ -561,14 +580,28 @@ paths:
                     - premium
                   example: "standard"
                 filters:
-                  type: boolean
+                  type: object
                   description: >
-                    A flag indicating whether to apply filters to the character's responses.
-                    Filters can be used to restrict certain types of content or language.
-                  enum:
-                    - true
-                    - false
-                  example: true
+                    Structured content filters applied to the character's responses.
+                    Provide the toggles you want to update when adjusting moderation settings.
+                  properties:
+                    active:
+                      type: boolean
+                      description: Enables or disables all filters for the character.
+                    violence:
+                      type: boolean
+                      description: Reinforces violent or gory content in character responses.
+                    sexual:
+                      type: boolean
+                      description: Reinforces sexual or suggestive content in character responses.
+                    drugs:
+                      type: boolean
+                      description: Reinforces references to drug use or paraphernalia in character responses.
+                  example:
+                    active: true
+                    violence: true
+                    sexual: false
+                    drugs: false
                 items:
                   type: array
                   description: A list of updated items for the character.
