@@ -225,14 +225,33 @@ paths:
                     - premium
                   example: "standard"
                 filters:
-                  type: boolean
+                  type: object
                   description: >
-                    Indicador de si se aplican filtros a las respuestas del personaje.
-                    Los filtros pueden usarse para restringir ciertos tipos de contenido o lenguaje.
-                  enum:
-                    - true
-                    - false
-                  example: true
+                    Filtros de contenido estructurados aplicados a las respuestas del personaje.
+                    Activa o desactiva las categorías individuales para controlar lo que puede decir.
+                  properties:
+                    active:
+                      type: boolean
+                      description: Activa o desactiva todos los filtros del personaje.
+                    violence:
+                      type: boolean
+                      description: Refuerza contenido violento o sangriento en las respuestas del personaje.
+                    sexual:
+                      type: boolean
+                      description: Refuerza contenido sexual o sugestivo en las respuestas del personaje.
+                    drugs:
+                      type: boolean
+                      description: Refuerza referencias al consumo de drogas o parafernalia en las respuestas del personaje.
+                  required:
+                    - active
+                    - violence
+                    - sexual
+                    - drugs
+                  example:
+                    active: true
+                    violence: false
+                    sexual: false
+                    drugs: true
                 items:
                   type: array
                   description: >
@@ -553,14 +572,28 @@ paths:
                     - premium
                   example: "standard"
                 filters:
-                  type: boolean
+                  type: object
                   description: >
-                    Indicador de si se aplican filtros a las respuestas del personaje.
-                    Los filtros pueden usarse para restringir ciertos tipos de contenido o lenguaje.
-                  enum:
-                    - true
-                    - false
-                  example: true
+                    Filtros de contenido estructurados aplicados a las respuestas del personaje.
+                    Indica los valores que deseas actualizar al ajustar la configuración de moderación.
+                  properties:
+                    active:
+                      type: boolean
+                      description: Activa o desactiva todos los filtros del personaje.
+                    violence:
+                      type: boolean
+                      description: Refuerza contenido violento o sangriento en las respuestas del personaje.
+                    sexual:
+                      type: boolean
+                      description: Refuerza contenido sexual o sugestivo en las respuestas del personaje.
+                    drugs:
+                      type: boolean
+                      description: Refuerza referencias al consumo de drogas o parafernalia en las respuestas del personaje.
+                  example:
+                    active: true
+                    violence: true
+                    sexual: false
+                    drugs: false
                 items:
                   type: array
                   description: Lista actualizada de objetos del personaje.
