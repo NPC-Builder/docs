@@ -41,9 +41,10 @@ info:
   termsOfService: https://npcbuilder.com/terms-and-conditions/
   contact:
     email: support@npcbuilder.com
-  version: 1.5.0
+  version: 1.6.0
 servers:
   - url: https://app.npcbuilder.com/api
+    description: API de producción para contexto, sesiones y endpoints que no son de interacciones
 tags:
   - name: Interactions
     description: Gestiona las conversaciones de texto de tus NPCs y sus respuestas interactivas.
@@ -66,7 +67,83 @@ paths:
       description: >
         Envía un array de mensajes de interacción entre el jugador y el personaje NPC.
         La API procesa el historial de conversación y devuelve una nueva respuesta generada por el personaje.
+        
+        **Modos de respuesta**
+
+        - **HTTP batch (por defecto):** Envía una petición `POST https://api.app.npcbuilder.com/api/interactions`. El servicio compone toda la respuesta y entrega un JSON con `response`, `user_events` y `character_events`.
+
+        - **Streaming por WebSocket:** Abre una conexión WebSocket a `wss://api.app.npcbuilder.com/api/interactions`. Una vez aceptada, envía:
+
+          ```json
+          {
+            "type": "interaction.start",
+            "payload": { ...interacción... },
+            "meta": {
+              "language": "es-ES",
+              "session_id": "opcional"
+            }
+          }
+          ```
+
+          El servidor emite los eventos `stream.accepted`, varios `stream.delta`, opcionalmente `stream.safe_response` cuando se detecta una frase vetada y, al finalizar, `stream.end` con el texto completo, los eventos y los tokens consumidos.  
+
+          Envía `{"type":"interaction.cancel"}` para abortar una generación.
+
+        **Complemento de voz (solo WebSocket)**
+
+        - Conecta a `wss://api.app.npcbuilder.com/api/interactions?voice=true` para voz bidireccional, o usa `voice=input` / `voice=output` para voz en un solo sentido. También puedes proporcionar `meta.voice` dentro de `interaction.start`.
+        - Con voz habilitada se mantienen los eventos `stream.*` de texto y además se envían eventos `voice.*`:
+          - `voice.ready`, `voice.session.updated` — estado de la sesión de Azure Voice Live.
+          - `voice.audio.delta`, `voice.audio.timestamp`, `voice.audio.done`, `voice.response.done` — audio generado por el asistente.
+          - `voice.transcript.delta`, `voice.input.started/stopped`, `voice.usage` — audio del micrófono transcrito por el servicio.
+        - Comandos aceptados mientras la sesión está activa:
+
+          ```json
+          { "type": "voice.input.append", "data": { "audio": "<chunk pcm16 base64>" } }
+          { "type": "voice.input.commit" }
+          { "type": "voice.input.clear" }
+          { "type": "voice.session.update", "data": { "voice_name": "en-US-Ava:DragonHDLatestNeural" } }
+          { "type": "voice.cancel" }
+          ```
+
+        El streaming de texto nunca se desactiva: siempre recibirás `stream.delta` y el `stream.end` final, incluso cuando la reproducción de voz está activa.
       operationId: addInteraction
+      servers:
+        - url: https://api.app.npcbuilder.com/api
+          description: API HTTP de producción para interacciones batch
+        - url: wss://api.app.npcbuilder.com/api
+          description: API WebSocket de producción para interacciones con streaming de texto y voz
+      x-websocket:
+        textStreamingUrl: wss://api.app.npcbuilder.com/api/interactions
+        voiceStreamingUrl: wss://api.app.npcbuilder.com/api/interactions?voice=true
+        voiceModes:
+          - "true"
+          - input
+          - output
+        clientMessages:
+          - interaction.start
+          - interaction.cancel
+          - voice.input.append
+          - voice.input.commit
+          - voice.input.clear
+          - voice.session.update
+          - voice.cancel
+        serverEvents:
+          - stream.accepted
+          - stream.delta
+          - stream.safe_response
+          - stream.end
+          - stream.error
+          - voice.ready
+          - voice.session.updated
+          - voice.audio.delta
+          - voice.audio.timestamp
+          - voice.audio.done
+          - voice.response.done
+          - voice.transcript.delta
+          - voice.input.started
+          - voice.input.stopped
+          - voice.usage
       parameters:
         - name: language
           in: query
@@ -88,6 +165,24 @@ paths:
           schema:
             type: string
             example: "60Z5aZjIuFlyYbjbZZKe"
+        - name: voice
+          in: query
+          description: >
+            Opcional. Controla el complemento de Azure Voice Live cuando se usa WebSocket. Valores aceptados:
+
+            * `false` (predeterminado): desactiva la voz.
+            * `true`: habilita audio bidireccional (STT + TTS).
+            * `input`: solo captura voz del usuario (STT).
+            * `output`: solo sintetiza el audio del asistente (TTS).
+          required: false
+          schema:
+            type: string
+            enum:
+              - "false"
+              - "true"
+              - input
+              - output
+            default: "false"
       requestBody:
         description: >
           Una carga útil en JSON, XML o codificada en URL que contiene el historial completo de la conversación. 
@@ -150,6 +245,107 @@ paths:
           content:
             application/json:
               example: "Error al crear la interacción"
+      security:
+        - npcbuilder_auth: []
+  /conversations:
+    get:
+      tags:
+        - Interactions
+      summary: Listar conversaciones
+      description: Recupera una lista de conversaciones, opcionalmente filtrada por ID de sesión, ID de personaje o ID de jugador.
+      parameters:
+        - name: session_id
+          in: query
+          description: ID de sesión opcional para filtrar conversaciones.
+          required: false
+          schema:
+            type: string
+        - name: character_id
+          in: query
+          description: ID de personaje opcional para filtrar conversaciones.
+          required: false
+          schema:
+            type: string
+        - name: player_id
+          in: query
+          description: ID de jugador opcional para filtrar conversaciones.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de conversaciones recuperada con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conversation'
+        '401':
+          description: No autorizado.
+      security:
+        - npcbuilder_auth: []
+    post:
+      tags:
+        - Interactions
+      summary: Crear una nueva conversación
+      description: Crea explícitamente una nueva conversación para un personaje y jugador.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - character_id
+                - game_id
+              properties:
+                character_id:
+                  type: string
+                game_id:
+                  type: string
+                session_id:
+                  type: string
+                metadata:
+                  type: object
+      responses:
+        '201':
+          description: Conversación creada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+      security:
+        - npcbuilder_auth: []
+  /conversations/{id}:
+    get:
+      tags:
+        - Interactions
+      summary: Obtener historial de conversación
+      description: Recupera el historial completo de mensajes para una conversación específica.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: El ID único de la conversación.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Historial de conversación recuperado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Messages'
+        '404':
+          description: Conversación no encontrada.
       security:
         - npcbuilder_auth: []
   /context/characters/{game_id}/{world_id}/{character_id}:
@@ -1960,6 +2156,10 @@ components:
         El esquema Interaction define la estructura para una conversación entre un jugador y un NPC.
         Incluye metadatos como ID del personaje, ID del juego, ID del mundo y un array de mensajes.
       properties:
+        conversation_id:
+          type: string
+          description: (Opcional) El identificador único de la conversación existente para cargar/persistir el historial.
+          example: "conv_12345"
         character_id:
           type: string
           description: El identificador único del personaje NPC.
@@ -2170,6 +2370,99 @@ components:
         - session_key
         - game_id
         - player_id 
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "conv_12345"
+        character_id:
+          type: string
+          example: "a96c6161-59f5-40f7-955e-459cd11"
+        player_id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        metadata:
+          type: object
+          example: { "location": "tavern" }
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    WebSocketInteractionEnvelope:
+      description: >
+        Sobre que se env\u00eda a trav\u00e9s del WebSocket para iniciar o cancelar una interacci\u00f3n en streaming.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - interaction.start
+            - interaction.cancel
+        payload:
+          $ref: '#/components/schemas/Interaction'
+        meta:
+          type: object
+          properties:
+            language:
+              type: string
+              example: es-ES
+            session_id:
+              type: string
+              example: 60Z5aZjIuFlyYbjbZZKe
+            voice:
+              type: string
+              description: Modo de voz opcional para sesiones WebSocket.
+              enum:
+                - "false"
+                - "true"
+                - input
+                - output
+              example: "true"
+    WebSocketVoiceCommand:
+      description: >
+        Comando enviado por el cliente a través de WebSocket cuando la voz está habilitada.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - voice.input.append
+            - voice.input.commit
+            - voice.input.clear
+            - voice.session.update
+            - voice.cancel
+        data:
+          type: object
+          description: Payload específico del comando. `voice.input.append` espera audio PCM16 en base64 en `data.audio`; `voice.session.update` puede incluir `voice_name`.
+    WebSocketStreamEvent:
+      description: >
+        Evento emitido por el servidor durante el streaming por WebSocket.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - stream.accepted
+            - stream.delta
+            - stream.safe_response
+            - stream.end
+            - stream.error
+            - voice.ready
+            - voice.session.updated
+            - voice.audio.delta
+            - voice.audio.timestamp
+            - voice.audio.done
+            - voice.response.done
+            - voice.transcript.delta
+            - voice.input.started
+            - voice.input.stopped
+            - voice.usage
+        data:
+          type: object
+          description: Carga \u00fatil espec\u00edfica del evento (frase, respuesta segura o consumos).
   requestBodies:
     Interaction:
       description: >
