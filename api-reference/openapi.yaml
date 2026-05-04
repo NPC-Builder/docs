@@ -746,6 +746,83 @@ paths:
       security:
         - npcbuilder_auth: []
   /context/characters/{game_id}/{world_id}/{character_id}:
+    get:
+      summary: Get character details
+      tags:
+        - Characters
+      description: >
+        Retrieve public details for a character. Internal fields such as knowledge,
+        relationships, filters, memory, and model are omitted.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: The unique identifier for the game.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: The unique identifier for the world.
+          schema:
+            type: string
+            example: "world456"
+        - name: character_id
+          in: path
+          required: true
+          description: The unique identifier for the character.
+          schema:
+            type: string
+            example: "character789"
+        - name: session_id
+          in: query
+          description: (Optional) The player's session ID.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Character retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  character_id:
+                    type: string
+                    description: UID of the character.
+                    example: "character789"
+                  character:
+                    $ref: '#/components/schemas/PublicCharacter'
+        '400':
+          description: >
+            Validation error - The request parameters did not match the required schema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found - The specified character was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message for the missing character.
+                    example: "Character with ID character789 not found."
+        '500':
+          description: >
+            Internal Server Error - An error occurred while retrieving the character.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
     patch:
       summary: Update character details
       tags:
@@ -1248,6 +1325,76 @@ paths:
       security:
         - npcbuilder_auth: []
   /context/world/{game_id}/{world_id}:
+    get:
+      summary: Get world details
+      tags:
+        - Worlds
+      description: >
+        Retrieve public details for a world, including related character, location,
+        and region summaries.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: The unique identifier for the game.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: The unique identifier for the world.
+          schema:
+            type: string
+            example: "world456"
+        - name: session_id
+          in: query
+          description: (Optional) The player's session ID.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: World retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  world_id:
+                    type: string
+                    description: UID of the world.
+                    example: "world456"
+                  world:
+                    $ref: '#/components/schemas/PublicWorld'
+        '400':
+          description: >
+            Validation error - The request parameters did not match the required schema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found - The specified world was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message for the missing world.
+                    example: "World with ID world456 not found."
+        '500':
+          description: >
+            Internal Server Error - An error occurred while retrieving the world.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
     patch:
       summary: Update world details
       tags:
@@ -1532,6 +1679,83 @@ paths:
       security:
         - npcbuilder_auth: []
   /context/region/{game_id}/{world_id}/{region_id}:
+    get:
+      summary: Get region details
+      tags:
+        - Regions
+      description: >
+        Retrieve public details for a region, including related location and character
+        summaries.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: The unique identifier for the game.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: The unique identifier for the world.
+          schema:
+            type: string
+            example: "world456"
+        - name: region_id
+          in: path
+          required: true
+          description: The unique identifier for the region.
+          schema:
+            type: string
+            example: "region789"
+        - name: session_id
+          in: query
+          description: (Optional) The player's session ID.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Region retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  region_id:
+                    type: string
+                    description: UID of the region.
+                    example: "region789"
+                  region:
+                    $ref: '#/components/schemas/PublicRegion'
+        '400':
+          description: >
+            Validation error - The request parameters did not match the required schema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found - The specified region was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message for the missing region.
+                    example: "Region not found."
+        '500':
+          description: >
+            Internal Server Error - An error occurred while retrieving the region.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
     patch:
       summary: Update region details
       tags:
@@ -1832,6 +2056,82 @@ paths:
       security:
         - npcbuilder_auth: []
   /context/location/{game_id}/{world_id}/{location_id}:
+    get:
+      summary: Get location details
+      tags:
+        - Locations
+      description: >
+        Retrieve public details for a location, including related character summaries.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: The unique identifier for the game.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: The unique identifier for the world.
+          schema:
+            type: string
+            example: "world456"
+        - name: location_id
+          in: path
+          required: true
+          description: The unique identifier for the location.
+          schema:
+            type: string
+            example: "location789"
+        - name: session_id
+          in: query
+          description: (Optional) The player's session ID.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Location retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location_id:
+                    type: string
+                    description: UID of the location.
+                    example: "location789"
+                  location:
+                    $ref: '#/components/schemas/PublicLocation'
+        '400':
+          description: >
+            Validation error - The request parameters did not match the required schema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found - The specified location was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message for the missing location.
+                    example: "Location not found."
+        '500':
+          description: >
+            Internal Server Error - An error occurred while retrieving the location.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
     patch:
       summary: Update location details
       tags:
@@ -2382,6 +2682,214 @@ components:
       description: >
         Error indicating that the requested operation is not implemented.
       example: "Not implemented yet."
+    PublicCharacterSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "character789"
+        name:
+          type: string
+          example: "Aragorn"
+        role:
+          type: string
+          example: "protagonist"
+    PublicLocationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "location789"
+        name:
+          type: string
+          example: "Rivertown"
+        role:
+          type: string
+          example: "Trade hub"
+        characters:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCharacterSummary'
+    PublicRegionSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "region789"
+        name:
+          type: string
+          example: "Mystic Forest"
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicLocationSummary'
+        characters:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCharacterSummary'
+    PublicCharacter:
+      type: object
+      description: Public character DTO. Internal fields such as knowledge, relationships, filters, memory, and model are omitted.
+      properties:
+        id:
+          type: string
+          example: "character789"
+        name:
+          type: string
+          example: "Aragorn"
+        description:
+          type: string
+          example: "A brave warrior with a mysterious past."
+        age:
+          type: string
+          example: "adult"
+        gender:
+          type: string
+          example: "Male"
+        role:
+          type: string
+          example: "protagonist"
+        tone:
+          type: string
+          example: "mysterious"
+        traits:
+          type: array
+          items:
+            type: string
+            example: "brave"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              itemName:
+                type: string
+                example: "Sword"
+              unit:
+                type: string
+                example: "Piece"
+              value:
+                oneOf:
+                  - type: string
+                  - type: number
+                example: 100
+              type:
+                type: string
+                example: "trade"
+              description:
+                type: string
+                example: "A sharp sword."
+        events:
+          type: array
+          items:
+            type: object
+            properties:
+              eventName:
+                type: string
+                example: "Attack"
+              type:
+                type: string
+                example: "action"
+              description:
+                type: string
+                example: "Act of violence against another person."
+        quests:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+                example: "Retrieve the lost artifact."
+              objective:
+                type: string
+                example: "Find and return the artifact."
+              reward:
+                type: string
+                example: "500 gold coins"
+    PublicLocation:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "location789"
+        name:
+          type: string
+          example: "Rivertown"
+        lore:
+          type: string
+          example: "A bustling market town."
+        role:
+          type: string
+          example: "Trade hub"
+        characters:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCharacterSummary'
+    PublicRegion:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "region789"
+        name:
+          type: string
+          example: "Mystic Forest"
+        lore:
+          type: string
+          example: "A dense forest with hidden secrets."
+        weather:
+          type: string
+          example: "Rainy"
+        culture:
+          type: string
+          example: "Druidic traditions"
+        politicalStability:
+          type: string
+          example: "stable"
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicLocationSummary'
+        characters:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCharacterSummary'
+    PublicWorld:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "world456"
+        name:
+          type: string
+          example: "Eldoria"
+        lore:
+          type: string
+          example: "A world where magic and technology coexist."
+        description:
+          type: string
+          example: "A bright high-fantasy world."
+        creatures:
+          type: string
+          example: "Dragons, Elves"
+        similarWorlds:
+          type: array
+          items:
+            type: string
+            example: "Middle Earth"
+        characters:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCharacterSummary'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicLocationSummary'
+        regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicRegionSummary'
     ErrorResponse:
       type: object
       description: Standard error response schema.
