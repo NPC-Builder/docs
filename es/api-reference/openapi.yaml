@@ -704,10 +704,53 @@ paths:
                   example: "mysterious"
                 traits:
                   type: array
-                  description: Lista de rasgos de personalidad que describen al personaje.
+                  description: Lista legacy/de rasgos básicos. Si se envía sin personality_theory, la API guarda el personaje como basicTraits.
                   items:
                     type: string
                     example: "brave"
+                personality_theory:
+                  type: string
+                  description: Marco de personalidad utilizado por interacciones.
+                  enum:
+                    - basicTraits
+                    - bigFive
+                    - darkTriad
+                    - dndAlignment
+                    - mbti
+                    - enneagram
+                  default: basicTraits
+                  example: "basicTraits"
+                personality_dimensions:
+                  type: object
+                  description: Valores de dimensiones para el personality_theory seleccionado. basicTraits usa traits y un objeto vacío.
+                  additionalProperties:
+                    type: integer
+                  example:
+                    machiavellianism: 4
+                    narcissism: 2
+                    psychopathy: 1
+                speech_pattern:
+                  type: object
+                  description: Controles opcionales del estilo de habla consumidos por interacciones.
+                  properties:
+                    vocabulary_level:
+                      type: string
+                      enum:
+                        - simple
+                        - moderate
+                        - sophisticated
+                        - archaic
+                      example: "sophisticated"
+                    sentence_length:
+                      type: string
+                      enum:
+                        - terse
+                        - average
+                        - verbose
+                      example: "terse"
+                    verbal_quirks:
+                      type: string
+                      example: "Siempre dice 'querido amigo'"
       responses:
         '200':
           description: Personaje creado correctamente.
@@ -743,6 +786,8 @@ paths:
                       role: "protagonist"
                       tone: "mysterious"
                       traits: ["brave"]
+                      personality_theory: "basicTraits"
+                      personality_dimensions: {}
         '400':
           description: >
             Error de validación – La carga útil de la solicitud no coincide con el esquema requerido.
@@ -1041,10 +1086,53 @@ paths:
                   example: "mysterious"
                 traits:
                   type: array
-                  description: Lista de rasgos de personalidad del personaje.
+                  description: Lista legacy/de rasgos básicos. Si se envía sin personality_theory, la API guarda el personaje como basicTraits.
                   items:
                     type: string
                     example: "brave"
+                personality_theory:
+                  type: string
+                  description: Marco de personalidad utilizado por interacciones.
+                  enum:
+                    - basicTraits
+                    - bigFive
+                    - darkTriad
+                    - dndAlignment
+                    - mbti
+                    - enneagram
+                  default: basicTraits
+                  example: "basicTraits"
+                personality_dimensions:
+                  type: object
+                  description: Valores de dimensiones para el personality_theory seleccionado. basicTraits usa traits y un objeto vacío.
+                  additionalProperties:
+                    type: integer
+                  example:
+                    machiavellianism: 4
+                    narcissism: 2
+                    psychopathy: 1
+                speech_pattern:
+                  type: object
+                  description: Controles opcionales del estilo de habla consumidos por interacciones.
+                  properties:
+                    vocabulary_level:
+                      type: string
+                      enum:
+                        - simple
+                        - moderate
+                        - sophisticated
+                        - archaic
+                      example: "sophisticated"
+                    sentence_length:
+                      type: string
+                      enum:
+                        - terse
+                        - average
+                        - verbose
+                      example: "terse"
+                    verbal_quirks:
+                      type: string
+                      example: "Siempre dice 'querido amigo'"
       responses:
         '200':
           description: Personaje actualizado correctamente.
@@ -1080,6 +1168,8 @@ paths:
                       role: "protagonist"
                       tone: "mysterious"
                       traits: ["brave"]
+                      personality_theory: "basicTraits"
+                      personality_dimensions: {}
         '400':
           description: >
             Error de validación – La carga útil de la solicitud no cumple los requisitos del esquema.
@@ -1899,84 +1989,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - npcbuilder_auth: []
-  /context/location/{game_id}/{world_id}/{location_id}:
-    get:
-      summary: Obtener detalles de la localización
-      tags:
-        - Locations
-      description: >
-        Recupera los detalles públicos de una localización, incluyendo resúmenes
-        de personajes relacionados.
-      parameters:
-        - name: game_id
-          in: path
-          required: true
-          description: El identificador único del juego.
-          schema:
-            type: string
-            example: "game123"
-        - name: world_id
-          in: path
-          required: true
-          description: El identificador único del mundo.
-          schema:
-            type: string
-            example: "world456"
-        - name: location_id
-          in: path
-          required: true
-          description: El identificador único de la localización.
-          schema:
-            type: string
-            example: "location789"
-        - name: session_id
-          in: query
-          description: (Opcional) El ID de sesión del jugador.
-          required: false
-          schema:
-            type: string
-            example: "60Z5aZjIuFlyYbjbZZKe"
-      responses:
-        '200':
-          description: Localización recuperada correctamente.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  location_id:
-                    type: string
-                    description: UID de la localización.
-                    example: "location789"
-                  location:
-                    $ref: '#/components/schemas/PublicLocation'
-        '400':
-          description: >
-            Error de validación - Los parámetros de la solicitud no coinciden con el esquema requerido.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: No encontrado - La localización especificada no existe.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Mensaje de error para la localización no encontrada.
-                    example: "Localización no encontrada."
-        '500':
-          description: >
-            Error interno del servidor - Ocurrió un error al recuperar la localización.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      security:
-        - npcbuilder_auth: []
+  /context/location/{game_id}/{world_id}/{region_id}:
     post:
       summary: Crear una nueva localización
       tags:
@@ -1999,13 +2012,13 @@ paths:
           schema:
             type: string
             example: "world456"
-        - name: location_id
+        - name: region_id
           in: path
           required: true
-          description: El identificador único de la localización.
+          description: El identificador único de la región donde se creará la localización.
           schema:
             type: string
-            example: "location789"
+            example: "region789"
         - name: session_id
           in: query
           description: (Opcional) El ID de sesión del jugador.
@@ -2082,6 +2095,84 @@ paths:
         '500':
           description: >
             Error interno del servidor – Ocurrió un error al crear la localización.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - npcbuilder_auth: []
+  /context/location/{game_id}/{world_id}/{location_id}:
+    get:
+      summary: Obtener detalles de la localización
+      tags:
+        - Locations
+      description: >
+        Recupera los detalles públicos de una localización, incluyendo resúmenes
+        de personajes relacionados.
+      parameters:
+        - name: game_id
+          in: path
+          required: true
+          description: El identificador único del juego.
+          schema:
+            type: string
+            example: "game123"
+        - name: world_id
+          in: path
+          required: true
+          description: El identificador único del mundo.
+          schema:
+            type: string
+            example: "world456"
+        - name: location_id
+          in: path
+          required: true
+          description: El identificador único de la localización.
+          schema:
+            type: string
+            example: "location789"
+        - name: session_id
+          in: query
+          description: (Opcional) El ID de sesión del jugador.
+          required: false
+          schema:
+            type: string
+            example: "60Z5aZjIuFlyYbjbZZKe"
+      responses:
+        '200':
+          description: Localización recuperada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location_id:
+                    type: string
+                    description: UID de la localización.
+                    example: "location789"
+                  location:
+                    $ref: '#/components/schemas/PublicLocation'
+        '400':
+          description: >
+            Error de validación - Los parámetros de la solicitud no coinciden con el esquema requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No encontrado - La localización especificada no existe.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Mensaje de error para la localización no encontrada.
+                    example: "Localización no encontrada."
+        '500':
+          description: >
+            Error interno del servidor - Ocurrió un error al recuperar la localización.
           content:
             application/json:
               schema:
@@ -2710,9 +2801,37 @@ components:
           example: "mysterious"
         traits:
           type: array
+          description: Lista legacy/de rasgos básicos. Para teorías no básicas, usa personality_theory y personality_dimensions.
           items:
             type: string
             example: "valiente"
+        personality_theory:
+          type: string
+          enum:
+            - basicTraits
+            - bigFive
+            - darkTriad
+            - dndAlignment
+            - mbti
+            - enneagram
+          example: "basicTraits"
+        personality_dimensions:
+          type: object
+          additionalProperties:
+            type: integer
+          example: {}
+        speech_pattern:
+          type: object
+          properties:
+            vocabulary_level:
+              type: string
+              example: "moderate"
+            sentence_length:
+              type: string
+              example: "average"
+            verbal_quirks:
+              type: string
+              example: ""
         items:
           type: array
           items:
