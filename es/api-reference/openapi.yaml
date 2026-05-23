@@ -70,7 +70,7 @@ paths:
         
         **Modos de respuesta**
 
-        - **HTTP batch (por defecto):** Envía una petición `POST https://api.app.npcbuilder.com/api/interactions`. El servicio compone toda la respuesta y entrega un JSON con `response`, `user_events` y `character_events`.
+        - **HTTP batch (por defecto):** Envía una petición `POST https://app.npcbuilder.com/api/interactions`. El servicio compone toda la respuesta y entrega un JSON con `response`, `user_events` y `character_events`.
 
         - **Streaming por WebSocket:** Abre una conexión WebSocket a `wss://api.app.npcbuilder.com/api/interactions`. Una vez aceptada, envía:
 
@@ -109,7 +109,7 @@ paths:
         El streaming de texto nunca se desactiva: siempre recibirás `stream.delta` y el `stream.end` final, incluso cuando la reproducción de voz está activa.
       operationId: addInteraction
       servers:
-        - url: https://api.app.npcbuilder.com/api
+        - url: https://app.npcbuilder.com/api
           description: API HTTP de producción para interacciones batch
         - url: wss://api.app.npcbuilder.com/api
           description: API WebSocket de producción para interacciones con streaming de texto y voz
